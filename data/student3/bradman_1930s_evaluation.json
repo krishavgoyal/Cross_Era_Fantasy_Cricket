@@ -1,0 +1,27 @@
+{
+  "input_spec": {
+    "width": 384,
+    "height": 512,
+    "fps": 7.0,
+    "frame_count": 16
+  },
+  "output_spec": {
+    "width": 384,
+    "height": 512,
+    "fps": 7.0,
+    "frame_count": 16
+  },
+  "input_metrics": {
+    "mean_chroma_distance_from_neutral": 1.2875,
+    "adjacent_luma_difference_mean": 11.1798,
+    "adjacent_luma_difference_max": 17.7764
+  },
+  "output_metrics": {
+    "mean_chroma_distance_from_neutral": 3.8087,
+    "adjacent_luma_difference_mean": 11.4673,
+    "adjacent_luma_difference_max": 18.0413
+  },
+  "mean_luma_ssim_input_to_output": 0.99887,
+  "verdict": "pass",
+  "note": "This validates post-processing preservation. Run Student 1's DWPose backend on the final clip and compare against aligned source pose data for full PCK motion-fidelity evaluation."
+}

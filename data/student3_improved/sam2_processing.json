@@ -1,0 +1,40 @@
+{
+  "input": "/mnt/c/Users/ASUS V16/Downloads/m3_magicanimate (2).mp4",
+  "output": "/mnt/c/Users/ASUS V16/OneDrive/Documents/New project/cross_era_motion_engine/data/student3_improved/bradman_1930s_improved_sam2.mp4",
+  "style": "1930s_archival_semantic_v2",
+  "input_spec": {
+    "width": 384,
+    "height": 512,
+    "fps": 7.0,
+    "frame_count": 16
+  },
+  "output_spec": {
+    "width": 384,
+    "height": 512,
+    "fps": 7.0,
+    "frame_count": 16
+  },
+  "segmentation_backend": "sam2",
+  "sam2_prompts": [
+    "player",
+    "helmet",
+    "skin",
+    "shirt",
+    "trousers",
+    "pads",
+    "bat",
+    "shoes"
+  ],
+  "encoder": "ffmpeg_libx264",
+  "operations": [
+    "semantic_masks",
+    "class_palette_colorization",
+    "backward_flow_warp",
+    "forward_backward_occlusion_confidence",
+    "scene_cut_reset",
+    "luminance_preservation"
+  ],
+  "limitations": [
+    "SAM2 mask quality depends on first-frame prompt boxes; inspect masks before accepting output."
+  ]
+}

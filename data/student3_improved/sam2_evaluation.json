@@ -1,0 +1,42 @@
+{
+  "input_spec": {
+    "width": 384,
+    "height": 512,
+    "fps": 7.0,
+    "frame_count": 16
+  },
+  "output_spec": {
+    "width": 384,
+    "height": 512,
+    "fps": 7.0,
+    "frame_count": 16
+  },
+  "checks": {
+    "resolution_preserved": true,
+    "frame_count_preserved": true,
+    "fps_preserved": true,
+    "luminance_mae_within_3": true,
+    "luminance_ssim_at_least_0_98": true
+  },
+  "luminance": {
+    "mean_absolute_error": 1.7655,
+    "psnr_db": 41.495,
+    "mean_local_ssim": 0.98887
+  },
+  "input_metrics": {
+    "mean_chroma_distance_from_neutral": 1.8535,
+    "mean_adjacent_chroma_change": 0.1472,
+    "max_adjacent_chroma_change": 0.2033,
+    "mean_adjacent_luma_change": 11.1798
+  },
+  "output_metrics": {
+    "mean_chroma_distance_from_neutral": 6.9738,
+    "mean_adjacent_chroma_change": 0.4304,
+    "max_adjacent_chroma_change": 0.5384,
+    "mean_adjacent_luma_change": 11.237
+  },
+  "technical_verdict": "pass",
+  "visual_quality_verdict": "requires_human_review",
+  "motion_fidelity": "not_measured: run Student 1 DWPose and compare aligned keypoints for PCK",
+  "important_note": "Technical checks do not prove semantic color accuracy, mask quality, historical authenticity, or absence of flicker. Inspect the rendered video and SAM2 masks."
+}

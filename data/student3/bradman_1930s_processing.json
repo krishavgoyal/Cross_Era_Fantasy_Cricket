@@ -1,0 +1,19 @@
+{
+  "input": "C:\\Users\\ASUS V16\\Downloads\\m3_magicanimate (2).mp4",
+  "output": "C:\\Users\\ASUS V16\\OneDrive\\Documents\\New project\\cross_era_motion_engine\\data\\student3\\bradman_1930s_graded_master.mp4",
+  "style": "1930s_archival",
+  "input_spec": {
+    "width": 384,
+    "height": 512,
+    "fps": 7.0,
+    "frame_count": 16
+  },
+  "encoder": "ffmpeg_libx264",
+  "operations": [
+    "luminance_preserved",
+    "semantic_palette",
+    "flow_warped_chroma",
+    "luma_edge_refinement",
+    "archival_grain"
+  ]
+}

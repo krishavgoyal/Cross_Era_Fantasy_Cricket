@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/cross-era-fantasy-cricket/metadata.schema.json",
+  "type": "object",
+  "required": ["schema_version", "project", "clip_id", "action_type", "source", "processed", "frames"],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "project": {"const": "Cross-Era Fantasy Cricket"},
+    "clip_id": {"type": "string", "minLength": 1},
+    "action_type": {"type": "string", "minLength": 1},
+    "role": {"type": "string"},
+    "source": {
+      "type": "object",
+      "required": ["path", "sha256", "source_fps", "source_frame_count", "source_resolution"],
+      "properties": {
+        "path": {"type": "string"},
+        "sha256": {"type": "string", "pattern": "^[a-fA-F0-9]{64}$"},
+        "source_fps": {"type": "number", "exclusiveMinimum": 0},
+        "source_frame_count": {"type": "integer", "minimum": 1},
+        "source_resolution": {"type": "array", "prefixItems": [{"type": "integer"}, {"type": "integer"}], "minItems": 2, "maxItems": 2}
+      }
+    },
+    "processed": {
+      "type": "object",
+      "required": ["fps", "frame_count", "resolution", "coordinate_system"],
+      "properties": {
+        "fps": {"type": "number", "enum": [24, 30]},
+        "frame_count": {"type": "integer", "minimum": 1},
+        "resolution": {"type": "array", "prefixItems": [{"const": 512}, {"const": 512}], "minItems": 2, "maxItems": 2},
+        "coordinate_system": {"type": "string"}
+      }
+    },
+    "frames": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["frame_index", "timestamp_ms", "track_id", "bbox_source_xyxy_px", "bbox_source_xyxy_norm"],
+        "properties": {
+          "frame_index": {"type": "integer", "minimum": 0},
+          "timestamp_ms": {"type": "number", "minimum": 0},
+          "track_id": {"type": ["integer", "null"]},
+          "bbox_source_xyxy_px": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number"}},
+          "bbox_source_xyxy_norm": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number", "minimum": 0, "maximum": 1}}
+        }
+      }
+    }
+  }
+}

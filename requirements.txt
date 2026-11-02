@@ -1,0 +1,16 @@
+# Install a CUDA-matched PyTorch build first from https://pytorch.org/get-started/locally/
+# Do not blindly pin CUDA wheels here: PyTorch wheel selection is platform/CUDA dependent.
+
+numpy>=1.26,<3
+opencv-python>=4.10,<5
+Pillow>=10,<12
+scipy>=1.11,<2
+ultralytics>=8.3
+# Lightweight DWPose wrapper with ONNX checkpoints.
+easy-dwpose==1.0.2
+onnxruntime==1.23.2
+huggingface-hub>=0.24,<1.0
+
+# Optional only if Student 1 later adds MMPose-based 3D lifting.
+# mmengine>=0.10
+# mmpose>=1.3

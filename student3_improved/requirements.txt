@@ -1,0 +1,5 @@
+numpy>=1.26,<3
+opencv-python>=4.10,<5
+pytest>=8,<10
+
+# Optional SAM2 runtime: install separately using the instructions in README.md.

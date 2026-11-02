@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+sam2-env/
+*.pt
+*.pth
+*.ckpt
+
+checkpoints/*.onnx

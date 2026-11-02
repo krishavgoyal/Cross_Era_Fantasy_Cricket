@@ -1,0 +1,49 @@
+{
+  "name": "1930s_archival_semantic_v2",
+  "expected_width": 384,
+  "expected_height": 512,
+  "expected_fps": 7.0,
+  "mask_feather_sigma": 1.4,
+  "temporal_strength": 0.38,
+  "flow_consistency_threshold": 1.5,
+  "scene_cut_threshold": 0.55,
+  "player_strength": 0.26,
+  "grass_strength": 0.72,
+  "sky_strength": 0.22,
+  "class_strength": {
+    "trousers": 0.64,
+    "shirt": 0.55,
+    "pads": 0.68,
+    "skin": 0.62,
+    "helmet": 0.76,
+    "bat": 0.72,
+    "shoes": 0.62
+  },
+  "edge_sharpen_amount": 0.0,
+  "grain_strength": 0.0,
+  "grain_seed": 1932,
+  "fallback_player_box": [0.17, 0.025, 0.84, 0.99],
+  "sam2_prompts": {
+    "player": {"box": [0.25, 0.055, 0.80, 0.94]},
+    "helmet": {"box": [0.27, 0.055, 0.49, 0.225]},
+    "skin": {"box": [0.36, 0.18, 0.55, 0.43]},
+    "shirt": {"box": [0.34, 0.19, 0.77, 0.61]},
+    "trousers": {"box": [0.43, 0.45, 0.77, 0.82]},
+    "pads": {"box": [0.39, 0.57, 0.63, 0.91]},
+    "bat": {"box": [0.35, 0.55, 0.50, 0.85]},
+    "shoes": {"box": [0.43, 0.82, 0.67, 0.94]}
+  },
+  "palette": {
+    "neutral_lab_ab": [128, 128],
+    "sky_lab_ab": [125, 123],
+    "grass_lab_ab": [111, 137],
+    "cloth_lab_ab": [133, 137],
+    "shirt_lab_ab": [133, 137],
+    "trousers_lab_ab": [132, 136],
+    "pads_lab_ab": [133, 137],
+    "helmet_lab_ab": [119, 126],
+    "skin_lab_ab": [145, 151],
+    "bat_lab_ab": [139, 151],
+    "shoes_lab_ab": [126, 132]
+  }
+}

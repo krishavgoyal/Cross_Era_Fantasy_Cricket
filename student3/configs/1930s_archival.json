@@ -1,0 +1,23 @@
+{
+  "name": "1930s_archival",
+  "expected_width": 384,
+  "expected_height": 512,
+  "expected_fps": 7.0,
+  "temporal_chroma_mix": 0.28,
+  "edge_sharpen_amount": 0.24,
+  "grain_strength": 2.1,
+  "dynamic_grain_strength": 0.35,
+  "subject_roi": [0.12, 0.06, 0.88, 0.98],
+  "cap_roi": [0.24, 0.06, 0.61, 0.24],
+  "face_roi": [0.28, 0.15, 0.57, 0.37],
+  "bat_roi": [0.16, 0.33, 0.82, 0.70],
+  "palette": {
+    "sky_lab_ab": [126, 116],
+    "grass_lab_ab": [111, 139],
+    "cloth_lab_ab": [132, 138],
+    "cap_lab_ab": [108, 131],
+    "skin_lab_ab": [148, 151],
+    "willow_lab_ab": [146, 159],
+    "neutral_lab_ab": [128, 128]
+  }
+}
