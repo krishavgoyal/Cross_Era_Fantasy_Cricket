@@ -1,0 +1,10 @@
+{
+  "milestone": 3,
+  "clip_id": "good_cover_drive_final",
+  "resolution": "512x512",
+  "num_frames_generated": 139,
+  "target_fps": 24.0,
+  "peak_vram_gb": 6.36,
+  "under_12gb_limit": true,
+  "inference_wall_time_sec": 3394.88
+}

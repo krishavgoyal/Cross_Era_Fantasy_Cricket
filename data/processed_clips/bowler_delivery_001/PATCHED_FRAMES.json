@@ -1,0 +1,7 @@
+{
+ "patched_frames": [
+  118
+ ],
+ "method": "real DensePose upper body kept; legs and feet (part ids 5 to 14) filled from the DWPose skeleton shapes; u,v set to 128 (placeholder) on the filled pixels",
+ "reason": "DensePose returned only an upper body fragment for frame 118 (motion blur at ball release); rerun at lower threshold made it worse"
+}
