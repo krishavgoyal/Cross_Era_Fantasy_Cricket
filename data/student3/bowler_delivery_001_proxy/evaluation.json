@@ -1,0 +1,129 @@
+{
+  "input_spec": {
+    "width": 384,
+    "height": 512,
+    "fps": 7.0,
+    "frame_count": 26
+  },
+  "output_spec": {
+    "width": 384,
+    "height": 512,
+    "fps": 7.0,
+    "frame_count": 26
+  },
+  "checks": {
+    "resolution_preserved": true,
+    "frame_count_preserved": true,
+    "fps_preserved": true,
+    "luminance_mae_within_3": true,
+    "luminance_ssim_at_least_0_98": true
+  },
+  "luminance": {
+    "mean_absolute_error": 1.5354,
+    "psnr_db": 42.901,
+    "mean_local_ssim": 0.98284
+  },
+  "colourfulness_hasler_suesstrunk": {
+    "input": 2.289,
+    "output": 22.481
+  },
+  "mask_coverage": {
+    "player_pixels_with_a_class_mean": 0.8851,
+    "class_share_of_player_mean": {
+      "trousers": 0.2917,
+      "shirt": 0.4847,
+      "shoes": 0.0349,
+      "skin": 0.0119,
+      "hair": 0.0617
+    }
+  },
+  "temporal": {
+    "hold_frame_chroma_delta_mean": 0.0734,
+    "keyframe_player_warping_error_mean": 1.4737,
+    "keyframe_player_warping_error_max": 2.5301,
+    "keyframe_blend_log": [
+      {
+        "keyframe": 0,
+        "blended": 0.0,
+        "player_flow_confidence": null
+      },
+      {
+        "keyframe": 1,
+        "blended": 1.0,
+        "player_flow_confidence": 0.4628
+      },
+      {
+        "keyframe": 2,
+        "blended": 1.0,
+        "player_flow_confidence": 0.5324
+      },
+      {
+        "keyframe": 3,
+        "blended": 1.0,
+        "player_flow_confidence": 0.472
+      },
+      {
+        "keyframe": 4,
+        "blended": 1.0,
+        "player_flow_confidence": 0.5219
+      },
+      {
+        "keyframe": 5,
+        "blended": 1.0,
+        "player_flow_confidence": 0.507
+      },
+      {
+        "keyframe": 6,
+        "blended": 1.0,
+        "player_flow_confidence": 0.608
+      },
+      {
+        "keyframe": 7,
+        "blended": 1.0,
+        "player_flow_confidence": 0.4934
+      },
+      {
+        "keyframe": 8,
+        "blended": 1.0,
+        "player_flow_confidence": 0.4533
+      },
+      {
+        "keyframe": 9,
+        "blended": 1.0,
+        "player_flow_confidence": 0.542
+      },
+      {
+        "keyframe": 10,
+        "blended": 1.0,
+        "player_flow_confidence": 0.5906
+      },
+      {
+        "keyframe": 11,
+        "blended": 1.0,
+        "player_flow_confidence": 0.6497
+      },
+      {
+        "keyframe": 12,
+        "blended": 1.0,
+        "player_flow_confidence": 0.6226
+      },
+      {
+        "keyframe": 13,
+        "blended": 1.0,
+        "player_flow_confidence": 0.4992
+      },
+      {
+        "keyframe": 14,
+        "blended": 1.0,
+        "player_flow_confidence": 0.4182
+      },
+      {
+        "keyframe": 15,
+        "blended": 1.0,
+        "player_flow_confidence": 0.3513
+      }
+    ]
+  },
+  "technical_verdict": "pass",
+  "visual_quality_verdict": "requires_human_review"
+}

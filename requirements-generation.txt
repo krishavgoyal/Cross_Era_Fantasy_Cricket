@@ -1,0 +1,14 @@
+# Student 2 generation env (on top of requirements.txt).
+# Install a CUDA PyTorch build first (RTX 50 series needs cu128): https://pytorch.org/get-started/locally/
+diffusers>=0.30,<0.33
+transformers>=4.41
+accelerate>=0.30
+safetensors>=0.4
+imageio>=2.34
+imageio-ffmpeg>=0.5
+# Models are downloaded from Hugging Face on first run:
+#   runwayml/stable-diffusion-v1-5, guoyww/animatediff-motion-adapter-v1-5-2, MnLgt/densepose, h94/IP-Adapter
+# The "pipeline_animatediff_controlnet" community pipeline is fetched by diffusers at load time.
+
+# Student 3 (colour): see student3_improved/requirements.txt; SAM2 is installed separately.
+# DensePose stage: separate env with detectron2 + projects/DensePose (see INTEGRATION.md).

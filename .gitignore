@@ -8,3 +8,7 @@ sam2-env/
 *.ckpt
 
 checkpoints/*.onnx
+
+# master pipeline runs
+runs/
+*.dwpose.json

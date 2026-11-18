@@ -1,0 +1,240 @@
+{
+  "name": "batsman_1930s_v3",
+  "role": "batsman",
+  "keyframes": 16,
+  "student2_preset": "ahaan-main",
+  "hold_threshold": 2.5,
+  "frame_layout": {
+    "lead": 3,
+    "tail": 7
+  },
+  "saturation": 1.0,
+  "mask_feather_sigma": 1.2,
+  "chroma_taper_luma": 40.0,
+  "temporal_strength": 0.35,
+  "temporal_min_player_confidence": 0.35,
+  "flow_consistency_threshold": 1.5,
+  "scene_cut_threshold": 0.55,
+  "era_outputs": [
+    "newsreel_1930s",
+    "remaster",
+    "broadcast_1970s"
+  ],
+  "era_presets": {
+    "newsreel_1930s": {
+      "fps": 18,
+      "retime_jitter": 0.35,
+      "sepia": true,
+      "sepia_bgr": [
+        0.93,
+        0.98,
+        1.04
+      ],
+      "contrast": 1.12,
+      "contrast_gamma": 1.15,
+      "lens_blur_sigma": 0.7,
+      "vignette": 0.9,
+      "flicker": 0.035,
+      "gate_weave_px": 1.2,
+      "grain": 0.035,
+      "dust_per_frame": 2.0,
+      "scratch_start_prob": 0.15,
+      "max_white": 0.94,
+      "black_lift": 0.04
+    },
+    "broadcast_1970s": {
+      "fps": 25,
+      "saturation": 0.62,
+      "cast_bgr": [
+        0.94,
+        1.0,
+        1.06
+      ],
+      "chromatic_shift_px": 2,
+      "bloom": 0.5,
+      "softness_sigma": 0.6,
+      "scanline_depth": 0.08,
+      "tape_noise_prob": 0.25,
+      "noise": 3.0
+    },
+    "remaster": {
+      "fps": 24,
+      "grain": 1.5
+    }
+  },
+  "class_parts": {
+    "shirt": [
+      1,
+      2,
+      15,
+      16,
+      17,
+      18
+    ],
+    "skin": [
+      19,
+      20,
+      21,
+      22
+    ],
+    "gloves": [
+      3,
+      4
+    ],
+    "trousers": [
+      7,
+      8,
+      9,
+      10
+    ],
+    "pads": [
+      11,
+      12,
+      13,
+      14
+    ],
+    "shoes": [
+      5,
+      6
+    ]
+  },
+  "head_split": {
+    "top_fraction": 0.42,
+    "top_class": "cap",
+    "face_class": "skin",
+    "back_of_head_class": "cap",
+    "face_visible": true
+  },
+  "class_order": [
+    "trousers",
+    "pads",
+    "shirt",
+    "shoes",
+    "gloves",
+    "skin",
+    "cap",
+    "bat"
+  ],
+  "base_player_class": "shirt",
+  "base_player_strength": 0.6,
+  "silhouette_fill_class": "pads",
+  "bat_from_student2": true,
+  "class_strength": {
+    "shirt": 0.9,
+    "trousers": 0.9,
+    "pads": 0.85,
+    "shoes": 0.8,
+    "gloves": 0.8,
+    "skin": 0.85,
+    "cap": 0.9,
+    "bat": 0.85
+  },
+  "palette": {
+    "neutral": [
+      128,
+      128
+    ],
+    "shirt": [
+      127,
+      138
+    ],
+    "trousers": [
+      127,
+      140
+    ],
+    "pads": [
+      127,
+      134
+    ],
+    "gloves": [
+      127,
+      134
+    ],
+    "skin": [
+      141,
+      153
+    ],
+    "cap": [
+      109,
+      138
+    ],
+    "shoes": [
+      128,
+      133
+    ],
+    "bat": [
+      131,
+      157
+    ],
+    "grass": [
+      103,
+      157
+    ],
+    "sky": [
+      124,
+      116
+    ]
+  },
+  "background": {
+    "horizon": 0.42,
+    "ramp": 0.2,
+    "grass_strength": 0.75,
+    "sky_strength": 0.3,
+    "grass_max_luma": 200
+  },
+  "overlay_colours_bgr": {
+    "shirt": [
+      255,
+      200,
+      60
+    ],
+    "trousers": [
+      60,
+      200,
+      255
+    ],
+    "pads": [
+      60,
+      255,
+      120
+    ],
+    "shoes": [
+      200,
+      60,
+      255
+    ],
+    "gloves": [
+      255,
+      255,
+      255
+    ],
+    "skin": [
+      80,
+      140,
+      255
+    ],
+    "cap": [
+      40,
+      160,
+      40
+    ],
+    "bat": [
+      0,
+      220,
+      255
+    ]
+  },
+  "notes": [
+    "Bradman 1930s: baggy green cap, rolled sleeves (forearms = skin), white gloves and pads, willow bat from Student 2's bat layer.",
+    "If the generated headwear is bright (mean luma >= 165, e.g. the sun hat in Ahaan-main's test_run) the cap is kept cream via palette_if_bright; a dark cap gets the baggy green."
+  ],
+  "palette_if_bright": {
+    "cap": {
+      "min_luma": 165,
+      "ab": [
+        127,
+        136
+      ]
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import json
 import time
 import torch
 import cv2
@@ -9,7 +10,10 @@ from diffusers.utils import export_to_video
 class Milestone3Engine:
     def __init__(self):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.dtype = torch.float16
+        # fp16 only on GPU: half precision on CPU fails or is extremely slow in diffusers
+        self.dtype = torch.float16 if self.device == "cuda" else torch.float32
+        self.last_sampling = None  # filled by load_aligned_densepose_sequence, written to the sidecar json
+        self.bowler_ref_box = None  # optional (x1,y1,x2,y2) normalized override for the bowler reference crop
         self.pipe = None
         # Standard 3:4 portrait resolution for both batsman and isolated bowler
         self.target_size = (384, 512)  # (width, height)
@@ -50,7 +54,8 @@ class Milestone3Engine:
             clip_sample=False
         )
 
-        self.pipe.enable_model_cpu_offload()
+        if self.device == "cuda":
+            self.pipe.enable_model_cpu_offload()
         self.pipe.enable_vae_slicing()
 
     def prepare_bradman_and_clean_background(self, image, role="batsman"):
@@ -73,8 +78,10 @@ class Milestone3Engine:
             bg_plate = cv2.GaussianBlur(bg_plate, (31, 15), 0)
 
             # 2. Isolate ONLY the bowler (Siraj: x in 23%..53%, y in 10%..98%)
-            bx1, bx2 = int(w * 0.23), int(w * 0.53)
-            by1, by2 = int(h * 0.10), int(h * 0.98)
+            # These defaults only fit data/historical_images/modern_bowler.jpeg; pass --ref-box for another photo.
+            rx1, ry1, rx2, ry2 = self.bowler_ref_box or (0.23, 0.10, 0.53, 0.98)
+            bx1, bx2 = int(w * rx1), int(w * rx2)
+            by1, by2 = int(h * ry1), int(h * ry2)
             bowler_crop = arr[by1:by2, bx1:bx2].copy()
             bowler_resized = np.array(
                 Image.fromarray(bowler_crop).resize(self.target_size, Image.Resampling.LANCZOS)
@@ -166,9 +173,11 @@ class Milestone3Engine:
 
         return bat_alpha, bat_lum
 
-    def load_aligned_densepose_sequence(self, video_path, target_frames=16, role="batsman"):
+    def load_aligned_densepose_sequence(self, video_path, target_frames=16, role="batsman", window=None):
         cap = cv2.VideoCapture(str(video_path))
         all_frames = []
+        source_index = []  # position of each kept frame in the DensePose video (= Student 1 frame_index)
+        n_read = 0
         while True:
             ret, frame = cap.read()
             if not ret:
@@ -176,18 +185,28 @@ class Milestone3Engine:
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             if np.count_nonzero(np.max(rgb, axis=2) > 15) > 1200:
                 all_frames.append(rgb)
+                source_index.append(n_read)
+            n_read += 1
         cap.release()
 
         total_frames = len(all_frames)
-        print(f"Total active frames in DensePose video ({role}): {total_frames}")
+        print(f"Total active frames in DensePose video ({role}): {total_frames} of {n_read}")
+        if total_frames == 0:
+            raise ValueError(f"invalid video: no DensePose foreground found in {video_path}")
 
-        if role == "bowler":
+        if window is not None:
+            # window = (first, last) frame of the DensePose video, inclusive
+            start_f = int(np.searchsorted(source_index, window[0]))
+            end_f = int(np.searchsorted(source_index, window[1], side="right")) - 1
+        elif role == "bowler":
             # Capture the run-up bound, bowling arm wheel, release, and follow-through
             start_f = min(8, max(0, total_frames - target_frames))
             end_f = max(start_f + target_frames - 1, total_frames - 2)
         else:
             start_f = min(24, max(0, total_frames - target_frames))
             end_f = min(total_frames - 4, 94)
+        start_f = int(np.clip(start_f, 0, total_frames - 1))
+        end_f = int(np.clip(end_f, start_f, total_frames - 1))
 
         indices = np.linspace(start_f, end_f, target_frames, dtype=int)
         sampled = [all_frames[i] for i in indices]
@@ -202,7 +221,7 @@ class Milestone3Engine:
 
         if len(coords) > 0:
             y_min, x_min = coords.min(axis=0)
-            y_max, x_max = coords.max(axis(0)) if hasattr(coords, "max") and False else coords.max(axis=0)
+            y_max, x_max = coords.max(axis=0)
 
             box_h = int((y_max - y_min) * 1.24)
             box_w = int(box_h * aspect)
@@ -223,6 +242,20 @@ class Milestone3Engine:
         else:
             pad = 0
             x1, y1, x2, y2 = 0, 0, w, h
+
+        # Record how generated frame k maps back to the DensePose/source frame and pixel space,
+        # so evaluation (PCK) and Student 3 prompts can be computed without guessing.
+        self.last_sampling = {
+            "densepose_video": str(video_path),
+            "densepose_frames_total": int(n_read),
+            "densepose_frames_active": int(total_frames),
+            "sampled_source_frames": [int(source_index[i]) for i in indices],
+            "crop_in_padded_px": [int(x1), int(y1), int(x2), int(y2)],
+            "pad_px": int(pad),
+            "densepose_size": [int(w), int(h)],
+            "generated_size": [int(self.target_size[0]), int(self.target_size[1])],
+            "note": "source pixel (x,y) -> generated: ((x + pad - x1) * gen_w / (x2 - x1), (y + pad - y1) * gen_h / (y2 - y1))",
+        }
 
         cropped_pils = []
         raw_hands = []
@@ -327,6 +360,9 @@ class Milestone3Engine:
                 dp_cond[bg_only] = bat_cond_layer[bg_only]
                 cv2.circle(dp_cond, (gx, gy), 7, (35, 90, 230), -1)
 
+                self.last_sampling.setdefault("bat_lines_generated_px", []).append(
+                    [int(gx), int(gy), int(tip_x), int(tip_y)])
+
                 y_head_bottom = y_top + int(body_h * 0.20)
                 bat_alpha, bat_lum = self.build_connected_bat_blade_layer(
                     target_h, target_w, gx, gy, tip_x, tip_y, y_head_bottom
@@ -379,9 +415,16 @@ class Milestone3Engine:
 
         return control_frames, part_masks
 
-    def generate(self, image, control_video, prompt, num_frames, fps, output_path, role="batsman"):
-        if "bowler" in str(control_video).lower() or "bowler" in str(image).lower():
-            role = "bowler"
+    def generate(self, image, control_video, prompt=None, num_frames=16, fps=None, output_path="outputs/m3.mp4",
+                 role="auto", negative_prompt=None, seed=42, steps=28, pad_start=3, pad_end=7, window=None):
+        """prompt/negative_prompt None -> the tuned built-in prompts for the role.
+        fps None -> 7 (the Milestone 3 export rate). pad_start/pad_end = frames the first/last keyframe is held.
+        window = (first, last) DensePose frame to sample from; None -> built-in per-role window.
+        Writes <output>.json next to the video with the frame mapping, timing and VRAM."""
+        if role in (None, "auto"):
+            role = "bowler" if ("bowler" in str(control_video).lower() or "bowler" in str(image).lower()) else "batsman"
+        export_fps = float(fps) if fps else 7.0
+        user_negative = negative_prompt  # the built-in prompt block below reuses the name negative_prompt
 
         if self.pipe is None:
             self.load_model()
@@ -392,9 +435,12 @@ class Milestone3Engine:
             image, role=role
         )
 
-        target_frame_count = 16
+        target_frame_count = int(num_frames or 16)
+        if target_frame_count != 16:
+            print("WARNING: the AnimateDiff v1-5-2 motion adapter is trained on 16-frame windows; "
+                  f"{target_frame_count} frames may lose temporal consistency.")
         control_frames, part_masks = self.load_aligned_densepose_sequence(
-            control_video, target_frames=target_frame_count, role=role
+            control_video, target_frames=target_frame_count, role=role, window=window
         )
 
         if torch.cuda.is_available():
@@ -425,6 +471,10 @@ class Milestone3Engine:
                 "horizontal line on legs, missing bat, broken bat, missing legs, missing pads, "
                 "white hat, sun hat, black shirt, blurry, color"
             )
+        if prompt:
+            historical_prompt = prompt
+        if user_negative:
+            negative_prompt = user_negative
 
         pipe_kwargs = dict(
             prompt=historical_prompt,
@@ -435,9 +485,9 @@ class Milestone3Engine:
             conditioning_frames=control_frames,
             ip_adapter_image=clip_ref_img,
             controlnet_conditioning_scale=0.98 if role == "bowler" else 0.95,
-            num_inference_steps=28,
+            num_inference_steps=int(steps),
             guidance_scale=7.5,
-            generator=torch.Generator(device="cpu").manual_seed(42)
+            generator=torch.Generator(device="cpu").manual_seed(int(seed))
         )
 
         print(f"Rendering {len(control_frames)} native frames for role='{role}'...")
@@ -448,10 +498,14 @@ class Milestone3Engine:
         valid_means = [g.mean() for g in gray_list if not np.isnan(g).any() and g.mean() > 45.0]
         median_mean = float(np.median(valid_means)) if valid_means else 120.0
 
+        replaced = []
         for i in range(len(gray_list)):
             g = gray_list[i]
             if np.isnan(g).any() or g.mean() < median_mean * 0.80 or g.std() < 18.0:
                 gray_list[i] = gray_list[i - 1].copy() if i > 0 else gray_list[min(1, len(gray_list) - 1)].copy()
+                replaced.append(i)
+        if replaced:
+            print(f"WARNING: {len(replaced)} broken generated frames replaced by a neighbour: {replaced}")
 
         rendered_keyframes = []
         for idx, gen_gray in enumerate(gray_list):
@@ -479,8 +533,9 @@ class Milestone3Engine:
             composite = gen_sharp * body_w + canvas * (1.0 - body_w)
             rendered_keyframes.append(composite)
 
-        # 26-frame sequence (~3.7s at 7 FPS)
-        frame_indices = [0] * 3 + list(range(target_frame_count)) + [target_frame_count - 1] * 7
+        # Default: 26-frame sequence (~3.7s at 7 FPS) = 3 held + 16 moving + 7 held.
+        # The master pipeline uses pad 0/0 so the clip only contains real motion.
+        frame_indices = [0] * int(pad_start) + list(range(target_frame_count)) + [target_frame_count - 1] * int(pad_end)
 
         rng = np.random.default_rng(42)
         final_frames = []
@@ -490,10 +545,41 @@ class Milestone3Engine:
             out_u8 = np.clip(frame_mat + grain, 0, 255).astype(np.uint8)
             final_frames.append(Image.fromarray(out_u8).convert("RGB"))
 
-        export_fps = 7
         export_to_video(final_frames, str(output_path), fps=export_fps)
         inference_time = time.time() - start_time
 
         peak_vram = torch.cuda.max_memory_allocated() / (1024**3) if torch.cuda.is_available() else 0.0
         print(f"Saved {role} video ({len(final_frames)} frames) to {output_path} | Peak VRAM: {peak_vram:.2f} GB | Time: {inference_time:.1f}s")
+
+        # Sidecar: everything downstream (Student 3 prompts, PCK, demo) needs to map output frames back
+        sampling = dict(self.last_sampling or {})
+        src = sampling.get("sampled_source_frames", [])
+        sidecar = {
+            "role": role,
+            "reference_image": str(image),
+            "output_video": str(output_path),
+            "export_fps": export_fps,
+            "output_frame_count": len(final_frames),
+            "keyframes": target_frame_count,
+            "pad_start": int(pad_start),
+            "pad_end": int(pad_end),
+            "output_frame_to_keyframe": [int(i) for i in frame_indices],
+            "output_frame_to_source_frame": [int(src[i]) for i in frame_indices] if src else None,
+            "replaced_broken_keyframes": replaced,
+            "prompt": historical_prompt,
+            "negative_prompt": negative_prompt,
+            "seed": int(seed),
+            "steps": int(steps),
+            "controlnet_conditioning_scale": pipe_kwargs["controlnet_conditioning_scale"],
+            "device": self.device,
+            "dtype": str(self.dtype),
+            "peak_vram_gb": round(peak_vram, 2),
+            "under_12gb_limit": bool(peak_vram < 12.0),
+            "inference_wall_time_sec": round(inference_time, 1),
+            "sampling": sampling,
+        }
+        with open(str(output_path) + ".json", "w") as f:
+            json.dump(sidecar, f, indent=1)
+        np.savez_compressed(str(output_path) + ".conditioning.npz",
+                            frames=np.stack([np.array(c) for c in control_frames]).astype(np.uint8))
         return peak_vram, inference_time

@@ -17,3 +17,5 @@ Bowler isolated and dynamically cropped from the broadcast clip. 512x512, 24 fps
 Same format as good_cover_drive_final (batting). Use control_pose.mp4 and/or control_densepose_real.mp4 as the ControlNet conditioning.
 
 Known limits: the bowler is small in the source broadcast (about 90 to 170 px tall), so the crop is upscaled 2.5 to 4.5x and softer than the batting clip. No bat or ball tracking.
+
+Added in integration: `densepose_real_parts.npz`, `densepose_real_iuv.npz`, `pose_vectors.npz` (same frames as the videos).
