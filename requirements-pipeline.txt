@@ -1,0 +1,6 @@
+# Laptop (CPU) requirements for pose extraction and control videos.
+# rtmlib pulls in the CPU "onnxruntime" package, which is what we want. Do NOT install onnxruntime-gpu.
+rtmlib==0.0.16
+numpy
+opencv-python
+scipy

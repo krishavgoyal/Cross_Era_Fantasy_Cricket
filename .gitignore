@@ -8,3 +8,20 @@ sam2-env/
 *.ckpt
 
 checkpoints/*.onnx
+
+# --- Colab/Kaggle VACE pipeline (scripts/, kaggle/) -------------------------------------
+# Scoped to this pipeline's own folders so teammates' tracked data/ files are unaffected.
+# Model weights are never committed anywhere.
+*.safetensors
+*.gguf
+*.onnx
+# Pipeline working data (inputs, poses, generated + styled videos) - share via Drive, not git
+data/clips/
+data/refs/
+data/pose/
+data/gen/
+data/styled/
+data/final/
+kaggle/output/
+.ipynb_checkpoints/
+# results/metrics.csv IS committed (small, needed for the report)
