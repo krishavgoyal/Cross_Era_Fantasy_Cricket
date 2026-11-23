@@ -30,6 +30,12 @@ Animate a historical cricketer from a single reference photo, using motion extra
 
 The bowler and the batter are generated as **separate clips** and cut together, the way a TV broadcast cuts between them.
 
+## Relation to team engine
+- **Student 2's AnimateDiff engine on `main`** (`generation_engine.py`, `generate_cli.py`) is our **baseline**.
+- **VACE (this pipeline)** is the **new generator**.
+- Both are compared on the **same cover-drive clip**, with the same reference photo and the same metrics, so the report can show the difference directly.
+- We do not modify the team's files; this pipeline lives in `scripts/`, `kaggle/` and the `*_PIPELINE`/`-pipeline` docs.
+
 ## Setup (laptop, once)
 
 ```powershell
@@ -67,7 +73,14 @@ Output: `control_33.mp4`, `control_33.npz` and `control_33_preview.jpg`. Options
 - `--duration` (seconds of source squeezed into the clip)
 - `--no-face`, `--no-hands`
 
-**3. Generation (Kaggle).** See `kaggle/` (task 3).
+**3. Generation (Kaggle, `kaggle/vace_generate.ipynb`).**
+1. Make a folder `cefc-inputs/` with `refs/` (photos), `controls/` (the `control_33.mp4` files) and `pairs.csv` (`name,ref,control[,prompt]`).
+2. Kaggle -> Datasets -> New Dataset -> upload that folder (Private).
+3. New Notebook -> File -> Import Notebook -> `kaggle/vace_generate.ipynb` -> Add Input -> your dataset.
+4. Settings: Accelerator **GPU T4 x2**, Internet **On** (phone verification needed), keep it Private.
+5. Run cells top to bottom until the 17-frame smoke test passes, then **Save Version -> Save & Run All**.
+
+Outputs: `outputs/*.mp4` (labelled "AI-generated - academic project"), `outputs_raw/*.mp4` (no label, for metrics), `outputs.zip`, `kaggle_runs.csv` (time and peak VRAM per run). Download them into `data/gen/`.
 
 **4–6.** `era_filters.py`, `eval_metrics.py` and `make_sequence.py` (tasks 4–6).
 
