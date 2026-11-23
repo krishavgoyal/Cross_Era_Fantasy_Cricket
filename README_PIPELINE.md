@@ -91,7 +91,24 @@ python scripts\era_filters.py --input data\gen\outputs_raw --preset all --out-di
 
 Presets: `1930s_film` (grayscale, grain, blur, gate jitter, flicker, vignette, 18 fps; `--sepia` for a warm tint), `1970s_tv` (desaturation, colour fringing, scanlines, tape noise, 25 fps), `1990s_broadcast` (mild colour, chroma bleed, softness, 25 fps). Seeded, so the same input and `--seed` always give the same output. Output: `data\styled\<name>_<preset>.mp4`.
 
-**5-6.** `eval_metrics.py` and `make_sequence.py` (tasks 5-6).
+**5. Metrics** (CPU; identity needs CPU torch + transformers + pillow, see `requirements-pipeline.txt`):
+
+```powershell
+python scripts\eval_metrics.py --name batter_vace --video data\gen\outputs_raw\batter_33f.mp4 `
+  --styled data\styled\batter_33f_1930s_film.mp4 data\styled\batter_33f_1970s_tv.mp4 `
+  --control data\pose\batter\control_33.npz --ref-photo data\refs\bradman.png
+```
+
+Appends one row per video to `results/metrics.csv` (commit it): `pck@0.2` (17 body keypoints vs the control), `dino_mean` / `dino_min` (identity vs the photo, grayscale), `brightness_std` and `frame_diff_mean` (flicker). Run the same command on the AnimateDiff baseline output with a different `--name` to compare.
+
+**6. Final sequence** (needs ffmpeg):
+
+```powershell
+python scripts\make_sequence.py --clips data\styled\bowler_33f_1970s_tv.mp4 data\styled\batter_33f_1990s_broadcast.mp4 `
+  --cards "Holding bowls" "Tendulkar drives" --intro "Michael Holding vs Sachin Tendulkar" --out data\final\final.mp4
+```
+
+All parts are letterboxed to the first clip's size and 25 fps (`--size`, `--fps` to change); title cards carry the AI-generated label.
 
 ## Background
 - `README.md`: the teammates' original engine (AnimateDiff-based)

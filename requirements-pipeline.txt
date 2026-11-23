@@ -1,6 +1,14 @@
-# Laptop (CPU) requirements for pose extraction and control videos.
+# Laptop (CPU) requirements for the VACE pipeline: pose extraction, control videos, era filters, metrics, editing.
 # rtmlib pulls in the CPU "onnxruntime" package, which is what we want. Do NOT install onnxruntime-gpu.
 rtmlib==0.0.16
 numpy
 opencv-python
 scipy
+
+# Only for scripts/eval_metrics.py identity metric (DINOv2-small on CPU). Install CPU torch FIRST so pip does not
+# pull the large CUDA build:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+# (skip all three lines below and pass --skip-identity to eval_metrics.py if you do not need the identity metric)
+transformers
+pillow
+# ffmpeg is a system tool, not a pip package: winget install Gyan.FFmpeg (needed by make_sequence.py)
