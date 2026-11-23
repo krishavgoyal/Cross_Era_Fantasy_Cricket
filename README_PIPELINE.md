@@ -82,7 +82,16 @@ Output: `control_33.mp4`, `control_33.npz` and `control_33_preview.jpg`. Options
 
 Outputs: `outputs/*.mp4` (labelled "AI-generated - academic project"), `outputs_raw/*.mp4` (no label, for metrics), `outputs.zip`, `kaggle_runs.csv` (time and peak VRAM per run). Download them into `data/gen/`.
 
-**4–6.** `era_filters.py`, `eval_metrics.py` and `make_sequence.py` (tasks 4–6).
+**4. Era styling** (use the UNLABELLED `outputs_raw/` videos; the label is added by this script):
+
+```powershell
+python scripts\era_filters.py --input data\gen\outputs_raw\batter_33f.mp4 --preset 1930s_film
+python scripts\era_filters.py --input data\gen\outputs_raw --preset all --out-dir data\styled
+```
+
+Presets: `1930s_film` (grayscale, grain, blur, gate jitter, flicker, vignette, 18 fps; `--sepia` for a warm tint), `1970s_tv` (desaturation, colour fringing, scanlines, tape noise, 25 fps), `1990s_broadcast` (mild colour, chroma bleed, softness, 25 fps). Seeded, so the same input and `--seed` always give the same output. Output: `data\styled\<name>_<preset>.mp4`.
+
+**5-6.** `eval_metrics.py` and `make_sequence.py` (tasks 5-6).
 
 ## Background
 - `README.md`: the teammates' original engine (AnimateDiff-based)
