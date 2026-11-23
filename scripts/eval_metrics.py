@@ -119,10 +119,35 @@ def biggest_box(model, frame: np.ndarray) -> np.ndarray | None:
     return boxes[int(np.argmax((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])))]
 
 
+def _identity_flicker_only(path, kind, name, model, frames, fps, ref_emb, dino, args) -> dict:
+    """Used when no control is given (e.g. another team's generator with its own canvas/timeline): no PCK."""
+    h, w = frames[0].shape[:2]
+    crops, found = [], 0
+    for frame in frames:
+        box = biggest_box(model, frame)
+        if box is None:
+            continue
+        found += 1
+        if dino is not None:
+            crops.append(person_crop(frame, box, gray=not args.rgb_identity))
+    dmean = dmin = float("nan")
+    if dino is not None and crops and ref_emb is not None:
+        sims = dino(crops) @ ref_emb
+        dmean, dmin = float(sims.mean()), float(sims.min())
+    bstd, fdiff = flicker_stats(frames)
+    return {"timestamp": time.strftime("%Y-%m-%d %H:%M:%S"), "name": name, "kind": kind, "video": str(path),
+            "frames_sampled": len(frames), "fps": round(fps, 2), "size": f"{w}x{h}",
+            "person_found_rate": round(found / len(frames), 3), "pck@0.2": float("nan"), "pck_valid_joints": 0,
+            "dino_mean": round(dmean, 4), "dino_min": round(dmin, 4),
+            "brightness_std": round(bstd, 3), "frame_diff_mean": round(fdiff, 3)}
+
+
 def evaluate_video(path: Path, kind: str, name: str, model, ctrl: np.ndarray, ctrl_fps: float, ctrl_size: tuple[int, int],
                    ref_emb: np.ndarray | None, dino: Dino | None, args) -> dict:
     frames, fps = read_video(path)
     h, w = frames[0].shape[:2]
+    if ctrl is None:                                                 # no control: identity + flicker only, all frames
+        return _identity_flicker_only(path, kind, name, model, frames, fps, ref_emb, dino, args)
     n = len(ctrl)
     # sample the video on the control's timeline (works for raw 16 fps and for retimed/styled 18 or 25 fps)
     idx = np.clip(np.round(np.arange(n) / ctrl_fps * fps).astype(int), 0, len(frames) - 1)
@@ -164,7 +189,7 @@ def main() -> int:
     ap.add_argument("--name", required=True, help="label for this clip in the CSV, e.g. batter_vace")
     ap.add_argument("--video", required=True, help="RAW generated video (outputs_raw/...)")
     ap.add_argument("--styled", nargs="*", default=[], help="styled versions of the same clip (data/styled/...)")
-    ap.add_argument("--control", required=True, help="control_33.npz written by make_control.py")
+    ap.add_argument("--control", help="control_33.npz written by make_control.py (omit = no PCK, identity + flicker only)")
     ap.add_argument("--ref-photo", help="reference photo for the identity metric (omit to skip identity)")
     ap.add_argument("--out", default="results/metrics.csv")
     ap.add_argument("--alpha", type=float, default=0.2, help="PCK threshold as a fraction of torso length")
@@ -174,8 +199,12 @@ def main() -> int:
     ap.add_argument("--skip-identity", action="store_true", help="skip DINOv2 (no torch/transformers needed)")
     args = ap.parse_args()
 
-    c = np.load(args.control)
-    ctrl, ctrl_fps, ctrl_size = c["kpts"][:, :17].astype(np.float32), float(c["fps"]), tuple(int(v) for v in c["size"])
+    ctrl = ctrl_fps = ctrl_size = None
+    if args.control:
+        c = np.load(args.control)
+        ctrl, ctrl_fps, ctrl_size = c["kpts"][:, :17].astype(np.float32), float(c["fps"]), tuple(int(v) for v in c["size"])
+    else:
+        print("No --control given: PCK skipped (identity + flicker only, every frame)")
     model = load_dwpose()
 
     dino = ref_emb = None
