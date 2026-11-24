@@ -39,6 +39,8 @@ Earlier Student 3 code lives in `C:\Users\ASUS V16\Downloads\student3_v3_bowler\
 - v2/v3 additions: `prepare_ref.py` (tight ref on white), `make_depth_control.py` (Depth Anything V2 Small, aligned with `make_control.py`), `build_kaggle_inputs.py`, `score_ablation.py` (-> `results/ablation.csv`), `retime.py` (real speed, default `blend`; `mci` tears the bat), `make_final.py` (one command -> `data/final/final*.mp4`, `final_eras*.mp4`, `compare*.mp4`).
 - Ablation result: **depth control fixes the bat**; the tight crop did not clearly raise identity; seed matters more than the reference. Finals: depth + `bradman_crop.png`, seed 42, 33 frames (`final_cap`, `final_nocap`).
 - ffmpeg 9.1 is installed via winget; `pose_utils.find_ffmpeg()` also finds it when PATH is stale.
+- FINAL CHOICES: batter F1 `final_cap_s42_33f.mp4` (real speed); bowler L3 `L3_s2024_33f.mp4` shown at 2x slow motion with `hold` retime (blend ghosts in slow motion). `make_match.py` defaults produce the final match. Milestone 4: `make_catalog.py`, `era_eval.py`, `make_figures.py`, `make_presentation.py`.
+- Report: `docs/report/main.tex` (plain two-column article, no course template exists; 4-page limit incl. refs; pdflatex not installed locally).
 
 ## Conventions
 - Videos, weights and `.npz` files are git-ignored. Work data goes in `data/` (ignored).

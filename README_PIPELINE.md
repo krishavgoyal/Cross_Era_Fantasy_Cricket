@@ -134,6 +134,22 @@ Retime methods (`python scripts\retime.py --method hold|blend|mci`):
 - `blend`: faint ghosting on the fastest frames but never distorts the bat. **Default.**
 - `mci`: motion-compensated, but it tore the thin bat in the interpolated frames and came out ~4 frames short. Not used.
 
+## Milestone 4: cross-era catalog, era evaluation, figures, presentation
+
+Final choices: batter **F1** `final_cap_s42_33f.mp4` (real speed, 5.6 s), bowler **L3** `L3_s2024_33f.mp4` (2x slow motion, 4.0 s, `hold` retime).
+
+```powershell
+python scripts\make_match.py              # final_match.mp4 (defaults: L3 4.0 s slow motion + F1, both 1930s)
+python scripts\make_final.py --input data\gen\bowler_raw\L3_s2024_33f.mp4 --tag _bowler --source-duration 4.0 --source-real-duration 2.0 --method hold --source-clip data\clips\B1_bowler.mp4 --control data\pose\bowler\depth_33.mp4 --title "Harold Larwood - bowling, reimagined (slow motion)"
+python scripts\make_catalog.py            # data\final\catalog\: match per era, match_crossera.mp4, catalog_reel.mp4 + docs\CATALOG.md
+python scripts\era_eval.py                # results\era_eval.csv: raw vs each era (PCK, identity, flicker, warping error)
+python scripts\make_figures.py            # docs\report\figs\ (ablation, final, pipeline, bowler, era strips)
+python scripts\make_presentation.py       # data\final\presentation_draft.mp4 (2:30, 1920x1080, no audio)
+```
+
+- `make_match.py --bowler-era 1930s_film --batter-era 1990s_broadcast --style-cards` makes a true cross-era match.
+- The video plan and narration are in `docs\VIDEO_SCRIPT.md` and `docs\VIDEO_NARRATION.md`.
+
 ## Bowler (Larwood) and the match video
 
 ```powershell
