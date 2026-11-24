@@ -134,6 +134,25 @@ Retime methods (`python scripts\retime.py --method hold|blend|mci`):
 - `blend`: faint ghosting on the fastest frames but never distorts the bat. **Default.**
 - `mci`: motion-compensated, but it tore the thin bat in the interpolated frames and came out ~4 frames short. Not used.
 
+## Bowler (Larwood) and the match video
+
+```powershell
+python scripts\extract_pose.py --video data\clips\B1_bowler.mp4 --out data\pose\bowler --list-boxes      # pick the central bowler
+python scripts\extract_pose.py --video data\clips\B1_bowler.mp4 --out data\pose\bowler --init-box 136,151,295,782
+python scripts\make_control.py --pose data\pose\bowler\raw.npz --out data\pose\bowler --start 0 --duration 2.0 --top-margin 0.08 --name control_33_margin
+python scripts\make_depth_control.py --video data\clips\B1_bowler.mp4 --pose data\pose\bowler\raw.npz --out data\pose\bowler --start 0 --duration 2.0 --top-margin 0.08 --soften-head --target-only
+python scripts\prepare_ref.py --input "C:\Users\ASUS V16\Downloads\larwood.jpg" --out data\refs\larwood_crop.png --compare-with data\refs\larwood_orig.jpg --compare-out ref_compare_larwood.png
+python scripts\build_kaggle_inputs.py --preset bowler          # -> C:\cefc\cefc-inputs-bowler.zip (L1/L2/L3)
+# Kaggle: notebook Cell 1 RUN_MODE = "pairs" (default). Then, after downloading outputs_raw to data\gen\bowler_raw\:
+python scripts\make_final.py --input data\gen\bowler_raw\L1_s42_33f.mp4 --tag _bowler --source-duration 2.0 --source-clip data\clips\B1_bowler.mp4 --control data\pose\bowler\depth_33.mp4 --title "Harold Larwood - bowling, reimagined"
+python scripts\make_match.py --bowler data\gen\bowler_raw\L1_s42_33f.mp4 --batter data\gen\v3_raw\final_nocap_s42_33f.mp4
+python scripts\score_ablation.py                                # L1-L3 identity is scored against Larwood
+```
+
+`--target-only` keeps only the tracked player in the depth map (person mask + skeleton capsule), so other people in the
+clip (here the fielders' legs) do not become extra players. The bowler clip is sampled at real speed (2.0 s ->
+33 frames at 16 fps), so `--source-duration 2.0` means no stretch.
+
 ## Likeness + bat ablation (v2)
 
 ```powershell

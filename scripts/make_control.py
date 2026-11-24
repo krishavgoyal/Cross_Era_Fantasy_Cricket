@@ -178,9 +178,11 @@ def canvas_transform(k: np.ndarray, width: int, height: int, height_frac: float,
     head = np.nanmedian(np.linalg.norm(neck - k[:, NOSE], axis=1))
     head_top = np.nanmin(k[:, NOSE, 1] - 0.9 * head) if np.isfinite(head) else y0
     y0 = min(y0, head_top)
-    feet = k[:, 17:23]                                    # toes/heels sit below the ankles: keep them inside too
-    x0, x1 = min(x0, np.nanmin(feet[..., 0])), max(x1, np.nanmax(feet[..., 0]))
-    y1 = max(y1, np.nanmax(feet[..., 1]))
+    # toes/heels sit below the ankles and fingers beyond the wrists (a bowler's raised hand!): keep them inside too
+    extra = np.concatenate([k[:, 17:23], k[:, 91:133]], axis=1)
+    if np.isfinite(extra).any():
+        x0, x1 = min(x0, np.nanmin(extra[..., 0])), max(x1, np.nanmax(extra[..., 0]))
+        y0, y1 = min(y0, np.nanmin(extra[..., 1])), max(y1, np.nanmax(extra[..., 1]))
     avail = height * (1 - top_margin)                     # content area below the margin
     s = min(height_frac * avail / body_h, 0.95 * width / (x1 - x0), 0.97 * avail / (y1 - y0))
     centre = np.array([(x0 + x1) / 2, (y0 + y1) / 2], np.float32)

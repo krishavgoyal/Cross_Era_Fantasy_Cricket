@@ -1,8 +1,10 @@
 timestamp,run,control_type,ref_type,seed,video,control,frames_sampled,fps,person_found_rate,pck@0.2,pck_valid_joints,dino_crop_mean,dino_crop_min,dino_orig_mean,dino_orig_min,brightness_std,frame_diff_mean
-2026-11-24 15:47:58,A,pose,padded,42,data/gen/v1_raw/bradman_batting_17f_smoke.mp4,data/pose/batter/control_33.npz,17,16.0,1.0,0.9343,289,0.2054,0.1655,0.1579,0.1272,2.274,10.097
-2026-11-24 15:48:07,B,depth,padded,42,data/gen/v2_raw/B_s42_17f.mp4,data/pose/batter/depth_33.npz,17,16.0,1.0,0.9965,289,0.2227,0.08,0.2908,0.1449,1.627,11.429
-2026-11-24 15:48:16,C,pose,crop,42,data/gen/v2_raw/C_s42_17f.mp4,data/pose/batter/control_33_margin.npz,17,16.0,1.0,0.9689,289,0.1715,0.1159,0.1295,0.0744,2.492,10.624
-2026-11-24 15:48:24,D1,depth,crop,42,data/gen/v2_raw/D1_s42_17f.mp4,data/pose/batter/depth_33.npz,17,16.0,1.0,0.9827,289,0.206,0.1238,0.2067,0.1138,1.975,10.257
-2026-11-24 15:48:32,D2,depth,crop,7,data/gen/v2_raw/D2_s7_17f.mp4,data/pose/batter/depth_33.npz,17,16.0,1.0,0.8997,289,0.2295,0.1141,0.2271,0.0985,1.488,10.971
-2026-11-24 15:48:41,D3,depth,crop,123,data/gen/v2_raw/D3_s123_17f.mp4,data/pose/batter/depth_33.npz,17,16.0,1.0,0.9792,289,0.1651,0.1006,0.1563,0.0922,2.06,11.898
-2026-11-24 15:48:49,D4,depth,crop,2024,data/gen/v2_raw/D4_s2024_17f.mp4,data/pose/batter/depth_33.npz,17,16.0,1.0,0.9896,289,0.3019,0.1685,0.3049,0.1724,1.247,10.403
+2026-11-24 17:08:42,A,pose,padded,42,data/gen/v1_raw/bradman_batting_17f_smoke.mp4,data/pose/batter/control_33.npz,17,16.0,1.0,0.9343,289,0.2054,0.1655,0.1579,0.1272,2.274,10.097
+2026-11-24 17:09:53,B,depth,padded,42,data/gen/v2_raw/B_s42_17f.mp4,data/pose/batter/depth_33.npz,17,16.0,1.0,0.9965,289,0.2227,0.08,0.2908,0.1449,1.627,11.429
+2026-11-24 17:11:00,C,pose,crop,42,data/gen/v2_raw/C_s42_17f.mp4,data/pose/batter/control_33_margin.npz,17,16.0,1.0,0.9689,289,0.1715,0.1159,0.1295,0.0744,2.492,10.624
+2026-11-24 17:11:15,D1,depth,crop,42,data/gen/v2_raw/D1_s42_17f.mp4,data/pose/batter/depth_33.npz,17,16.0,1.0,0.9827,289,0.206,0.1238,0.2067,0.1138,1.975,10.257
+2026-11-24 17:11:55,D2,depth,crop,7,data/gen/v2_raw/D2_s7_17f.mp4,data/pose/batter/depth_33.npz,17,16.0,1.0,0.8997,289,0.2295,0.1141,0.2271,0.0985,1.488,10.971
+2026-11-24 17:14:21,D3,depth,crop,123,data/gen/v2_raw/D3_s123_17f.mp4,data/pose/batter/depth_33.npz,17,16.0,1.0,0.9792,289,0.1651,0.1006,0.1563,0.0922,2.06,11.898
+2026-11-24 17:14:53,D4,depth,crop,2024,data/gen/v2_raw/D4_s2024_17f.mp4,data/pose/batter/depth_33.npz,17,16.0,1.0,0.9896,289,0.3019,0.1685,0.3049,0.1724,1.247,10.403
+2026-11-24 17:15:36,F1,depth,crop,42,data/gen/v3_raw/final_cap_s42_33f.mp4,data/pose/batter/depth_33.npz,33,16.0,1.0,0.9037,561,0.2168,0.0649,0.1746,0.0398,1.652,11.926
+2026-11-24 17:16:44,F2,depth,crop,42,data/gen/v3_raw/final_nocap_s42_33f.mp4,data/pose/batter/depth_33.npz,33,16.0,1.0,0.8824,561,0.2035,0.0955,0.1952,0.0741,3.776,9.165

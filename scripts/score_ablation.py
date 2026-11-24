@@ -10,7 +10,9 @@ The run list is a small CSV (default results/ablation_runs.csv) with columns
 Runs whose video file is missing are reported and skipped, so you can score as soon as some outputs arrive.
 17-frame videos are scored against the first 17 control frames.
 
-Identity columns: dino_crop_* = vs data/refs/bradman_crop.png, dino_orig_* = vs data/refs/bradman.png (grayscale crops).
+Identity columns: dino_crop_* = vs the tight reference, dino_orig_* = vs the original photo (grayscale crops).
+Defaults: data/refs/bradman_crop.png and data/refs/bradman.png. A row can override them with optional columns
+ref_crop / ref_orig (the bowler rows use data/refs/larwood_crop.png / data/refs/larwood_raw.jpg).
 
 Usage
   python scripts/score_ablation.py
@@ -54,16 +56,26 @@ def main() -> int:
         raise SystemExit("No run videos found yet - download the Kaggle outputs into the paths in " + args.runs)
 
     model = load_dwpose()
-    dino, refs = None, None
-    if not args.skip_identity:
-        dino = Dino()
-        refs = {"crop": ref_embedding(model, dino, args.ref_crop), "orig": ref_embedding(model, dino, args.ref_orig)}
+    dino = None if args.skip_identity else Dino()
+    cache: dict[str, np.ndarray | None] = {}
+
+    def emb(path: str):
+        """Reference embedding, cached per file; None (-> NaN columns) if the photo is missing."""
+        if dino is None:
+            return None
+        if path not in cache:
+            cache[path] = ref_embedding(model, dino, path) if Path(path).exists() else None
+            if cache[path] is None:
+                print(f"WARNING: reference {path} not found -> identity columns NaN for rows using it")
+        return cache[path]
     opts = SimpleNamespace(alpha=args.alpha, thr=args.thr, rgb_identity=False)
 
     rows = []
     for r in todo:
         c = np.load(r["control"])
         ctrl, cfps, csize = c["kpts"][:, :17].astype(np.float32), float(c["fps"]), tuple(int(v) for v in c["size"])
+        refs = None if dino is None else {"crop": emb(r.get("ref_crop") or args.ref_crop),
+                                          "orig": emb(r.get("ref_orig") or args.ref_orig)}
         m = evaluate_video(Path(r["video"]), "raw", r["run"], model, ctrl, cfps, csize, refs, dino, opts)
         row = {k: m.get(k, "") for k in FIELDS}
         row.update(timestamp=time.strftime("%Y-%m-%d %H:%M:%S"), run=r["run"], control_type=r["control_type"],

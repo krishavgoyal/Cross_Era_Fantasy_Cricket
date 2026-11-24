@@ -13,6 +13,9 @@ Usage
   python scripts/make_final.py --input data/gen/v1_raw/bradman_batting_33f.mp4 --control data/pose/batter/control_33.mp4
   python scripts/make_final.py --input data/gen/v3_raw/final_cap_s42_33f.mp4 --tag _cap
   python scripts/make_final.py --input data/gen/v3_raw/final_nocap_s42_33f.mp4 --tag _nocap
+  # bowler: the 2.0 s clip was sampled at real speed (33 frames @ 16 fps), so --source-duration 2.0 = no stretch
+  python scripts/make_final.py --input data/gen/bowler_raw/L1_s42_33f.mp4 --tag _bowler --source-duration 2.0 ^
+      --source-clip data/clips/B1_bowler.mp4 --control data/pose/bowler/depth_33.mp4 --title "Harold Larwood - bowling, reimagined"
 """
 from __future__ import annotations
 
@@ -67,6 +70,21 @@ def make_compare(source_clip: str, source_start: float, duration: float, control
     return write_video(out, burn_label(frames), fps)
 
 
+def retime_and_style(src: str | Path, work: Path, source_duration: float, fps: float = 24.0, method: str = DEFAULT_METHOD,
+                     presets=tuple(p for p, _ in ERAS)) -> tuple[list[np.ndarray], float, dict]:
+    """Retime src to its real duration, then apply the era presets. Returns (retimed frames, fps, {preset: path})."""
+    stem = Path(src).stem
+    retimed = retime(src, work / f"{stem}_retimed.mp4", source_duration, fps, method)
+    frames, rfps = read_video(retimed)
+    print(f"{stem}: retimed ({method}) {len(frames)} frames @ {rfps:g} = {len(frames) / rfps:.2f} s")
+    styled = {}
+    for preset in presets:
+        st, sfps = apply_preset(preset, frames, rfps)
+        styled[preset] = write_video(work / f"{stem}_retimed_{preset}.mp4", st, sfps)
+        print(f"  {preset}: {len(st)} frames @ {sfps:g} = {len(st) / sfps:.2f} s")
+    return frames, rfps, styled
+
+
 def check(path: Path, clip_part: tuple[float, float] | None = None) -> str:
     """Duration, near-black frames (inside clip_part seconds if given) and whether the label pixels are present."""
     frames, fps = read_video(path)
@@ -84,13 +102,15 @@ def main() -> int:
     ap.add_argument("--input", required=True, help="RAW generated 33-frame clip (no label)")
     ap.add_argument("--tag", default="", help="suffix for the outputs, e.g. _cap")
     ap.add_argument("--out-dir", default="data/final")
-    ap.add_argument("--source-duration", type=float, default=5.6)
+    ap.add_argument("--source-duration", type=float, default=5.6,
+                    help="seconds of source the 33 frames cover (make_control --duration): 5.6 batter, 2.0 bowler")
     ap.add_argument("--source-clip", default="data/clips/C2_coverdrive.mp4")
     ap.add_argument("--source-start", type=float, default=0.0)
     ap.add_argument("--control", default="data/pose/batter/depth_33.mp4", help="control video that generated --input")
     ap.add_argument("--method", default=DEFAULT_METHOD, choices=["hold", "blend", "mci"])
     ap.add_argument("--fps", type=float, default=24.0)
-    ap.add_argument("--intro", default="Sir Don Bradman - a cover drive, reimagined")
+    ap.add_argument("--title", "--intro", dest="intro", default="Sir Don Bradman - a cover drive, reimagined",
+                    help="intro card title")
     ap.add_argument("--intro-sub", default=LABEL)
     ap.add_argument("--card-seconds", type=float, default=2.5)
     ap.add_argument("--era-card-seconds", type=float, default=1.5)
@@ -98,19 +118,8 @@ def main() -> int:
 
     out, work = Path(args.out_dir), Path(args.out_dir) / "work"
     work.mkdir(parents=True, exist_ok=True)
-    stem = Path(args.input).stem
-
-    # 1) real speed
-    retimed = retime(args.input, work / f"{stem}_retimed.mp4", args.source_duration, args.fps, args.method)
-    frames, fps = read_video(retimed)
-    print(f"retimed ({args.method}): {len(frames)} frames @ {fps:g} = {len(frames) / fps:.2f} s")
-
-    # 2) era styles (each keeps the duration and burns the label)
-    styled = {}
-    for preset, _ in ERAS:
-        st, sfps = apply_preset(preset, frames, fps)
-        styled[preset] = write_video(work / f"{stem}_retimed_{preset}.mp4", st, sfps)
-        print(f"{preset}: {len(st)} frames @ {sfps:g} = {len(st) / sfps:.2f} s")
+    # 1) real speed + 2) era styles (each keeps the duration and burns the label)
+    frames, fps, styled = retime_and_style(args.input, work, args.source_duration, args.fps, args.method)
     size = (frames[0].shape[1], frames[0].shape[0])
 
     # 3) final: intro card + 1930s clip

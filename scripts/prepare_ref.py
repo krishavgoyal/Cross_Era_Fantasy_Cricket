@@ -73,13 +73,20 @@ def compose_tight(gray: np.ndarray, alpha: np.ndarray, width: int, height: int, 
 
 
 def contact_sheet(old_path: str | None, new_img: np.ndarray, out_path: Path) -> None:
+    """old | new side by side (old letterboxed, not stretched)."""
     tiles, titles = [], []
     if old_path and Path(old_path).exists():
         old = cv2.imdecode(np.fromfile(old_path, np.uint8), cv2.IMREAD_COLOR)
-        tiles.append(cv2.resize(old, (new_img.shape[1], new_img.shape[0])))
+        H, W = new_img.shape[:2]                                 # letterbox (keep the old image's aspect ratio)
+        s = min(W / old.shape[1], H / old.shape[0])
+        small = cv2.resize(old, (int(old.shape[1] * s), int(old.shape[0] * s)), interpolation=cv2.INTER_AREA)
+        tile = np.full((H, W, 3), 255, np.uint8)
+        y, x = (H - small.shape[0]) // 2, (W - small.shape[1]) // 2
+        tile[y:y + small.shape[0], x:x + small.shape[1]] = small
+        tiles.append(tile)
         titles.append("OLD: " + Path(old_path).name)
     tiles.append(cv2.cvtColor(new_img, cv2.COLOR_GRAY2BGR) if new_img.ndim == 2 else new_img)
-    titles.append("NEW: " + out_path.name.replace("ref_compare", "crop"))
+    titles.append("NEW (tight crop)")
     sheet = []
     for t, title in zip(tiles, titles):
         bar = np.full((40, t.shape[1], 3), 40, np.uint8)
@@ -100,6 +107,7 @@ def main() -> int:
     ap.add_argument("--top-margin", type=float, default=0.03, help="white margin above the head (fraction of height)")
     ap.add_argument("--max-side-crop", type=float, default=0.15,
                     help="allowed crop of the subject box per side (0 = never cut the sides, may leave white space)")
+    ap.add_argument("--compare-out", default="ref_compare.png", help="file name of the contact sheet (next to --out)")
     ap.add_argument("--model", default="u2net", help="rembg model (u2net keeps the bat; isnet-general-use also ok)")
     args = ap.parse_args()
 
@@ -114,13 +122,13 @@ def main() -> int:
     out.parent.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(out), cv2.cvtColor(out_img, cv2.COLOR_GRAY2BGR))
     cv2.imwrite(str(out.with_name(out.stem + "_mask.png")), (out_alpha * 255).astype(np.uint8))
-    contact_sheet(args.compare_with, out_img, out.with_name("ref_compare.png"))
+    contact_sheet(args.compare_with, out_img, out.with_name(args.compare_out))
 
     ys = np.where(out_alpha.max(axis=1) > 0.5)[0]
     xs = np.where(out_alpha.max(axis=0) > 0.5)[0]
     print(f"Subject spans rows {ys.min()}-{ys.max()} ({(ys.max() - ys.min() + 1) / args.height:.0%} of height), "
           f"cols {xs.min()}-{xs.max()}; top margin {ys.min()} px")
-    print(f"Wrote {out}, {out.with_name(out.stem + '_mask.png')} and {out.with_name('ref_compare.png')}")
+    print(f"Wrote {out}, {out.with_name(out.stem + '_mask.png')} and {out.with_name(args.compare_out)}")
     return 0
 
 

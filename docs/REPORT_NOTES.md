@@ -143,11 +143,39 @@ PCK is against each run's own control (pose runs vs the skeleton, depth runs vs 
   - `mci` (ffmpeg `minterpolate`): rejected. The thin bat handle tears/fades in the interpolated frames, and the output came out short (131 instead of 135 frames, motion about 2 frames early).
 - `scripts/make_final.py` produces `final.mp4` (2.5 s intro card + 5.67 s 1930s clip), `final_eras.mp4` (1930s / 1970s / 1990s, each after a 1.5 s card, 21.6 s) and `compare.mp4` (source | control | generated 1930s, same 5.6 s timeline).
 - Checks: no black frames; label present on every output.
-- **[TODO]** final_cap / final_nocap: add PCK / DINO / flicker from `score_ablation.py` rows F1/F2 and the visual verdict (face visible? one bat? pads white?).
+- Final batter clips (33 frames, depth + `bradman_crop.png`, seed 42; `results/ablation.csv` rows F1/F2):
+
+  | Run | Prompt | PCK@0.2 | DINO vs crop | DINO vs orig | Brightness std | Frame diff |
+  |---|---|---|---|---|---|---|
+  | F1 `final_cap` | default (cap) | 0.904 | 0.217 | 0.175 | 1.65 | 11.93 |
+  | F2 `final_nocap` | bare-headed | 0.882 | 0.203 | 0.195 | 3.78 | 9.17 |
+
+  Both follow the motion well over the full 33 frames. Identity scores are similar (within the seed spread seen in D1-D4). The no-cap prompt has more brightness variation, but lower frame-to-frame difference. **[TODO]** visual verdict (face visible? one bat? white pads?).
 
 ### 6.3 Team baseline
 
 - AnimateDiff vs VACE comparison: see `docs/TEAM_INTEGRATION.md` (identity + flicker comparable directly; PCK from Student 3's evaluator). **[TODO]** numbers.
+
+### 6.4 Bowler: Harold Larwood (same pipeline)
+
+- **Source clip** `data/clips/B1_bowler.mp4`: a 2.0 s portrait clip (488x944, 30 fps, 60 frames) of a modern fast bowler running at the camera, with two fielders' legs at the top of the frame for the first ~1.2 s.
+- **Pose:** `extract_pose.py --init-box 136,151,295,782` (the central bowler, not the fielders). 0 frames lost, median body score 0.77 (lowest single frame 0.48).
+- **Controls:** `--start 0 --duration 2.0`, so the 33 frames at 16 fps are **real speed** (no retime stretch).
+  - Pose `control_33_margin` (8% top margin). The margin box now also includes the finger keypoints, because the raised bowling hand otherwise touched the top edge.
+  - **Target-only depth** (`make_depth_control.py --target-only --soften-head`):
+    1. Per frame, a person mask around his tracked box: rembg `u2net_human_seg` (fell back to the cached `u2net`, because the human-seg model download kept failing).
+    2. Keep only the blobs that contain his keypoints.
+    3. AND with a "body capsule" drawn from his own skeleton (thick limbs + head disc), which removes fielders' legs that touch his silhouette in 2-D.
+    4. Background is flat black (far); his depth is normalised over his own pixels to 0.15-1.0.
+    - Check images: `data/pose/bowler/depth_preview.mp4`, `depth_align_check.jpg`.
+- **Reference:** `data/refs/larwood_crop.png` from the 1929 National Library of Australia photo, background removed, head + torso at 90% of the height.
+  - Contact sheet: `data/refs/ref_compare_larwood.png`.
+  - The photo shows a **fedora, suit and cigarette**, which VACE tends to copy, so the negative prompt lists them.
+- **Runs** (`cefc-inputs-bowler.zip`, notebook `RUN_MODE = "pairs"`): L1/L2/L3 = target-only depth + `larwood_crop.png`, seeds 42 / 7 / 2024, 33 frames.
+  - Prompt: "archival 1930s photograph, fast bowler, bare-headed with short neatly combed hair, face clearly visible, white long-sleeved flannel shirt and long white trousers, white boots, delivering a cricket ball with a high overarm bowling action, natural motion".
+  - Negative: the default negative **without "missing bat"** (it would push the model to draw a bat), plus "cricket bat, cap, hat, fedora, suit, blazer, jacket, dark coat, cigarette, helmet, logo, purple shirt, coloured kit, shorts, bare legs, sleeveless, extra people".
+- **Match video:** `make_match.py` -> `data/final/final_match.mp4`: intro card "Harold Larwood vs Sir Don Bradman - Bodyline, reimagined", then "Larwood bowls" + bowler (1930s), then "Bradman drives" + batter (1930s, default `final_nocap`).
+- **Results [TODO]:** L1-L3 PCK / identity vs `larwood_crop.png` and the original photo (`score_ablation.py`), visual check (bare-headed? no hat or cigarette? white kit? one ball, no bat, no extra people?), chosen seed.
 
 ## 7. Limitations
 
@@ -182,4 +210,7 @@ PCK is against each run's own control (pose runs vs the skeleton, depth runs vs 
 | OpenCV / NumPy / SciPy | Apache-2.0 / BSD-3 / BSD-3 |
 | FFmpeg (gyan.dev build) | GPL-3.0 |
 | Kaggle | Kaggle Terms of Use (no deceptive content) |
-| Reference photos / clips | Record the source and licence of each file in the report **[TODO]** |
+| Harold Larwood reference (`data/refs/larwood_orig.jpg`, `larwood_crop.png`) | Public domain. National Library of Australia, Fairfax glass plate negative, 1929, nla.obj-161865715 (Wikimedia Commons "Harold Larwood 1929.jpg") |
+| Don Bradman reference (`bradman.png`, `bradman_crop.png`) | Record the source and licence **[TODO]** |
+| Driving clips (`C2_coverdrive.mp4`, `B1_bowler.mp4`) | Broadcast / social-media footage, used for private research only, not redistributed **[TODO: source]** |
+| rembg models (u2net, u2net_human_seg) | Apache-2.0 (U^2-Net) |

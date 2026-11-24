@@ -13,6 +13,9 @@ Depth handling
   * --soften-head flattens and blurs the head region (from the head keypoints) so the modern helmet's shape
     (peak, grille) does not override the reference face; the region keeps roughly the right distance.
   * Areas outside the source frame (after the canvas placement) are black (= far).
+  * --target-only keeps ONLY the tracked player (person mask per frame around his tracked box from raw.npz):
+    other people (e.g. fielders' legs at the top of the frame) and the ground become flat black, so VACE does not
+    turn them into extra players. The player's depth is normalised over his own pixels to 0.15-1.0.
 
 Usage
   python scripts/make_depth_control.py --video data/clips/C2_coverdrive.mp4 --pose data/pose/batter/raw.npz ^
@@ -92,6 +95,84 @@ def soften_head(depth: np.ndarray, k133: np.ndarray, strength: float = 1.0) -> n
     return depth * (1 - mask) + flat * mask
 
 
+def body_capsule(kpts: np.ndarray, scores: np.ndarray, shape: tuple[int, int], thr: float = 0.3) -> np.ndarray:
+    """Soft mask of the area around one person's skeleton (source pixels): limb capsules + head disc + hands/feet."""
+    h, w = shape
+    cap = np.zeros((h, w), np.uint8)
+    ok = scores > thr
+    body = kpts[:17][ok[:17]]
+    if len(body) < 4:
+        return np.ones((h, w), np.float32)                     # too few points to trust: do not cut anything
+    size = float(body[:, 1].max() - body[:, 1].min())          # rough body height in pixels
+    thick = max(10, int(0.16 * size))
+    limbs = [(5, 7), (7, 9), (6, 8), (8, 10), (5, 6), (11, 12), (5, 11), (6, 12), (11, 13), (13, 15), (12, 14), (14, 16),
+             (15, 17), (15, 19), (16, 20), (16, 22)]
+    for a, b in limbs:
+        if ok[a] and ok[b]:
+            cv2.line(cap, tuple(int(v) for v in kpts[a]), tuple(int(v) for v in kpts[b]), 1, thick)
+    torso = [i for i in (5, 6, 12, 11) if ok[i]]
+    if len(torso) >= 3:
+        cv2.fillConvexPoly(cap, kpts[torso].astype(np.int32), 1)
+    if ok[0] and ok[5] and ok[6]:                               # head disc around/above the nose
+        neck = (kpts[5] + kpts[6]) / 2
+        r = int(1.1 * np.linalg.norm(neck - kpts[0]))
+        cv2.circle(cap, (int(kpts[0][0]), int(kpts[0][1] - 0.3 * r)), max(8, r), 1, -1)
+    for i in range(91, 133):                                    # fingers (the ball hand!)
+        if ok[i]:
+            cv2.circle(cap, (int(kpts[i][0]), int(kpts[i][1])), max(6, thick // 3), 1, -1)
+    return cv2.GaussianBlur(cap.astype(np.float32), (0, 0), max(2.0, thick / 6))
+
+
+class TargetMasker:
+    """Mask (source resolution, 0..1) of ONLY the tracked player in one frame.
+
+    mode "seg": rembg u2net_human_seg on a crop around the tracked box (box grown by `pad`), then keep only the
+                connected blobs that contain one of the player's confident body keypoints -> drops other people
+                (e.g. fielders' legs) that reach into the crop.
+    mode "box": the tracked box itself, grown by `pad` and feathered (no segmentation model needed).
+    """
+
+    def __init__(self, mode: str = "seg", pad: float = 0.15):
+        self.mode, self.pad = mode, pad
+        if mode == "seg":
+            from rembg import new_session
+            try:
+                self.session = new_session("u2net_human_seg")           # person segmentation (downloaded once)
+            except Exception as e:                                     # offline / download reset: use cached u2net
+                print(f"WARNING: u2net_human_seg unavailable ({type(e).__name__}); using u2net (salient object). "
+                      "The keypoint blob filter still keeps only the tracked player.")
+                self.session = new_session("u2net")
+
+    def __call__(self, frame: np.ndarray, box: np.ndarray, kpts: np.ndarray, scores: np.ndarray, thr: float = 0.3) -> np.ndarray:
+        h, w = frame.shape[:2]
+        x1, y1, x2, y2 = box
+        px, py = self.pad * (x2 - x1), self.pad * (y2 - y1)
+        X1, Y1, X2, Y2 = int(max(0, x1 - px)), int(max(0, y1 - py)), int(min(w, x2 + px)), int(min(h, y2 + py))
+        mask = np.zeros((h, w), np.float32)
+        if self.mode == "box":
+            mask[Y1:Y2, X1:X2] = 1.0
+            return cv2.GaussianBlur(mask, (0, 0), 3)
+        from PIL import Image
+        from rembg import remove
+        crop = cv2.cvtColor(frame[Y1:Y2, X1:X2], cv2.COLOR_BGR2RGB)
+        alpha = np.asarray(remove(Image.fromarray(crop), session=self.session))[..., 3].astype(np.float32) / 255.0
+        n, labels = cv2.connectedComponents((alpha > 0.5).astype(np.uint8), connectivity=8)
+        keep = np.zeros_like(alpha, bool)
+        pts = kpts[:17][scores[:17] > thr]
+        for x, y in pts:                                        # blobs that contain one of HIS keypoints
+            cx, cy = int(round(x)) - X1, int(round(y)) - Y1
+            if 0 <= cx < alpha.shape[1] and 0 <= cy < alpha.shape[0] and labels[cy, cx] > 0:
+                keep |= labels == labels[cy, cx]
+        if not keep.any() and n > 1:                            # no keypoint landed inside: keep the biggest blob
+            areas = [(labels == i).sum() for i in range(1, n)]
+            keep = labels == 1 + int(np.argmax(areas))
+        keep = cv2.dilate(keep.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+        mask[Y1:Y2, X1:X2] = alpha * keep
+        # Other people can TOUCH his silhouette in 2-D (fielders' legs above his head), so also require every
+        # pixel to lie near HIS skeleton: thick capsules along his bones plus a head disc.
+        return mask * body_capsule(kpts, scores, (h, w), thr)
+
+
 def save_head_check(before: list[np.ndarray], after: list[np.ndarray], k: np.ndarray, path: Path) -> None:
     """Head close-ups at 4 frames: top row before softening, bottom row after."""
     rows = [[], []]
@@ -128,6 +209,11 @@ def main() -> int:
     # --- depth options ---
     ap.add_argument("--soften-head", action="store_true", help="flatten/blur the head so the helmet shape is removed")
     ap.add_argument("--head-strength", type=float, default=1.0, help="0-1, how strongly the head is flattened")
+    ap.add_argument("--target-only", action="store_true",
+                    help="keep ONLY the tracked player (others and the ground become flat black = far)")
+    ap.add_argument("--target-mask", choices=["seg", "box"], default="seg",
+                    help="seg = rembg u2net_human_seg around his tracked box (default), box = the dilated box itself")
+    ap.add_argument("--target-pad", type=float, default=0.15, help="grow the tracked box by this fraction for the mask")
     ap.add_argument("--name", default=None, help="output base name (default depth_<frames>)")
     ap.add_argument("--model", default=MODEL_ID)
     args = ap.parse_args()
@@ -147,9 +233,13 @@ def main() -> int:
 
     # 2) depth per frame (source resolution), placed on the canvas with the same affine as the skeleton
     model = DepthModel(args.model)
-    raw, valid, srcs = [], [], []
+    masker = TargetMasker(args.target_mask, args.target_pad) if args.target_only else None
+    raw, valid, srcs, masks = [], [], [], []
     for t, i in enumerate(idx):
         d = model(frames[i])
+        if masker is not None:
+            m = masker(frames[i], data["boxes"][i], data["kpts"][i], data["scores"][i], args.thr)
+            masks.append(cv2.warpAffine(m, M, (args.width, args.height), flags=cv2.INTER_LINEAR, borderValue=0))
         raw.append(cv2.warpAffine(d, M, (args.width, args.height), flags=cv2.INTER_LINEAR, borderValue=0))
         valid.append(cv2.warpAffine(np.ones_like(d), M, (args.width, args.height), flags=cv2.INTER_NEAREST, borderValue=0) > 0.5)
         srcs.append(cv2.warpAffine(frames[i], M, (args.width, args.height), borderValue=(0, 0, 0)))
@@ -157,10 +247,19 @@ def main() -> int:
             print(f"  depth frame {t + 1}/{args.frames}")
 
     # 3) ONE global normalisation over all frames (no per-frame stretch -> no brightness pumping)
-    allv = np.concatenate([r[v] for r, v in zip(raw, valid)])
-    lo, hi = float(allv.min()), float(allv.max())
-    print(f"Global depth range: {lo:.3f} .. {hi:.3f} (near = bright)")
-    depth = [np.where(v, (r - lo) / max(hi - lo, 1e-6), 0.0).astype(np.float32) for r, v in zip(raw, valid)]
+    if masker is None:
+        allv = np.concatenate([r[v] for r, v in zip(raw, valid)])
+        lo, hi = float(allv.min()), float(allv.max())
+        print(f"Global depth range: {lo:.3f} .. {hi:.3f} (near = bright)")
+        depth = [np.where(v, (r - lo) / max(hi - lo, 1e-6), 0.0).astype(np.float32) for r, v in zip(raw, valid)]
+    else:
+        # only the player: one global range over HIS pixels, mapped to 0.15..1 so even his farthest parts stay
+        # visibly brighter than the flat black (= far) background; other people and the ground are removed
+        allv = np.concatenate([r[(m > 0.5) & v] for r, v, m in zip(raw, valid, masks)])
+        lo, hi = float(np.percentile(allv, 1)), float(np.percentile(allv, 99))
+        print(f"Target-only depth range: {lo:.3f} .. {hi:.3f} (player mapped to 0.15-1.0, background 0)")
+        depth = [(m * np.where(v, 0.15 + 0.85 * np.clip((r - lo) / max(hi - lo, 1e-6), 0, 1), 0.0)).astype(np.float32)
+                 for r, v, m in zip(raw, valid, masks)]
     if args.soften_head:
         before = depth
         depth = [soften_head(d, k_canvas[t], args.head_strength) for t, d in enumerate(depth)]
@@ -173,7 +272,7 @@ def main() -> int:
     write_video(out / f"{name}.mp4", depth8, args.fps)
     np.savez_compressed(out / f"{name}.npz", kpts=k_canvas.astype(np.float32), fps=args.fps,
                         size=np.array([args.width, args.height]), source_frames=idx, depth_range=np.array([lo, hi]),
-                        top_margin=args.top_margin, soften_head=args.soften_head)
+                        top_margin=args.top_margin, soften_head=args.soften_head, target_only=args.target_only)
 
     # 4) previews: source | pose | depth (labelled), plus an alignment still
     panels = []
