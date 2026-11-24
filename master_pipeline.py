@@ -85,6 +85,14 @@ def build_parser():
     g.add_argument("--steps", type=int, default=28)
     g.add_argument("--seed", type=int, default=42)
     g.add_argument("--ref-box", type=float, nargs=4, default=None)
+    g.add_argument("--gen-engine", choices=["v1", "v2"], default="v1",
+                   help="v2 = generation_v2.py: adds a skeleton ControlNet (pose_data.json) and back/front view control")
+    g.add_argument("--pose-scale", type=float, default=0.8, help="v2: skeleton ControlNet weight")
+    g.add_argument("--gen-clean", action="store_true",
+                   help="v2: plain backdrop, crisp outline, no colour-guessed brightening (use with --frames 32)")
+    g.add_argument("--generated", type=Path, default=None,
+                   help="use an existing Student 2 video (e.g. outputs/m3_bowler_delivery.mp4) instead of generating; "
+                        "the frame mapping is then taken from Student 3 v3")
     g.add_argument("--legacy-timing", action="store_true",
                    help="Milestone 3 timing: 3+7 held frames at 7 fps (default: no held frames, real-time keyframe fps)")
 
@@ -99,6 +107,9 @@ def build_parser():
 
     o = p.add_argument_group("output / control")
     o.add_argument("--final-fps", type=float, default=24.0)
+    o.add_argument("--retime-mode", choices=["interpolate", "hold"], default="interpolate",
+                   help="interpolate = ffmpeg minterpolate (blends neighbours: ghosting on fast limbs); "
+                        "hold = repeat each generated frame (no blending, every frame is a real one)")
     o.add_argument("--skip", nargs="*", default=[], choices=STAGES)
     o.add_argument("--force", nargs="*", default=[], choices=STAGES + ["all"])
     o.add_argument("--only", nargs="*", default=None, choices=STAGES)
@@ -149,6 +160,49 @@ def action_window(pose_json, before_s=2.0, after_s=0.45, fps=24.0):
     return first, last, peak
 
 
+def write_derived_sidecar(proc, path, role):
+    """Sidecar for a video generated without one (older Student 2 runs), from Student 3 v3's processing.json."""
+    g = proc["student2_geometry"]
+    side = {
+        "role": role,
+        "derived_by": "student3_v3 processing.json (frame layout detected from held frames, crop re-derived)",
+        "keyframes": len(g["sampled_source_indices"]),
+        "output_frame_to_keyframe": proc["frame_layout"]["keyframe_of_output_frame"],
+        "replaced_broken_keyframes": [],
+        "sampling": {"sampled_source_frames": g["sampled_source_indices"], "crop_in_padded_px": g["crop_xyxy_padded"],
+                     "pad_px": g["pad"], "generated_size": g["target_size"]},
+    }
+    src = side["sampling"]["sampled_source_frames"]
+    side["output_frame_to_source_frame"] = [src[k] for k in side["output_frame_to_keyframe"]]
+    json.dump(side, open(path, "w"), indent=1)
+    return side
+
+
+def keyframe_video(src, dst, layout, fps=7):
+    """Drop held/padded frames: keep the first output frame of every keyframe."""
+    import cv2
+    cap = cv2.VideoCapture(str(src))
+    frames = []
+    while True:
+        ok, f = cap.read()
+        if not ok:
+            break
+        frames.append(f)
+    first = {}
+    for i, k in enumerate(layout[:len(frames)]):
+        first.setdefault(k, i)
+    keep = [frames[first[k]] for k in sorted(first)]
+    h, w = keep[0].shape[:2]
+    p = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{w}x{h}", "-r", str(fps),
+                          "-i", "-", "-c:v", "libx264", "-crf", "14", "-pix_fmt", "yuv420p", str(dst)], stdin=subprocess.PIPE)
+    for f in keep:
+        p.stdin.write(np.ascontiguousarray(f).tobytes())
+    p.stdin.close()
+    if p.wait() != 0:
+        raise StageError("retime", EXIT_OUTPUT, "ffmpeg failed writing keyframes")
+    return len(keep)
+
+
 def keyframe_fps(sidecar, src_fps):
     """fps at which the sampled keyframes play back in real time."""
     src = sidecar["sampling"]["sampled_source_frames"]
@@ -172,7 +226,10 @@ class Pipeline:
         self.manifest = {"clip_id": a.clip_id, "role": a.role, "image": str(a.image), "run_dir": str(self.run_dir),
                          "started": dt.datetime.now().isoformat(timespec="seconds"), "stages": {}}
         force = set(a.force)
-        self.force = set(STAGES) if "all" in force else force
+        if "all" in force:
+            # motion + DensePose can only be redone from the raw broadcast clip
+            force = set(STAGES) if a.reference_video else set(STAGES) - {"motion", "densepose"}
+        self.force = force
 
     # ---------- helpers
     def want(self, stage, outputs):
@@ -246,6 +303,8 @@ class Pipeline:
         self.record("densepose", "done", t0)
 
     def generate(self):
+        if self.a.generated is not None:
+            return self._use_existing_video()
         outs = [self.gen, Path(str(self.gen) + ".json")]
         if not self.want("generate", outs):
             return self.record("generate", "skipped (outputs exist)" if all(o.exists() for o in outs) else "skipped")
@@ -278,6 +337,10 @@ class Pipeline:
             cmd += ["--window", *window]
         if a.ref_box:
             cmd += ["--ref-box", *a.ref_box]
+        if a.gen_engine == "v2":
+            cmd += ["--engine", "v2", "--pose-json", self.clip / "pose_data.json", "--pose-scale", a.pose_scale]
+            if a.gen_clean:
+                cmd += ["--clean"]
         run_cmd("generate", cmd, a.dry_run)
         extra = {}
         if not a.dry_run:
@@ -287,6 +350,23 @@ class Pipeline:
             extra["source_frames"] = side["sampling"]["sampled_source_frames"]
         self.record("generate", "done", t0, **extra)
 
+    def _use_existing_video(self):
+        """--generated: take a video Student 2 already made. If it differs from the run's copy, redo everything after it."""
+        import filecmp
+        a = self.a
+        if not a.dry_run and not a.generated.exists():
+            raise StageError("generate", EXIT_INPUT, f"--generated video does not exist: {a.generated}")
+        self.run_dir.mkdir(parents=True, exist_ok=True)
+        changed = not self.gen.exists() or (not a.dry_run and not filecmp.cmp(a.generated, self.gen, shallow=False))
+        if changed and not a.dry_run:
+            shutil.copyfile(a.generated, self.gen)
+            stale = Path(str(self.gen) + ".json")
+            if stale.exists():
+                stale.unlink()  # the mapping of an earlier run does not belong to this video
+            self.force |= {"colour", "retime", "demo", "evaluate"}
+        return self.record("generate", "used existing video" + (" (new)" if changed else " (unchanged)"), None,
+                           source=str(a.generated), note="frame mapping comes from Student 3 v3 unless a sidecar exists")
+
     def colour(self):
         outs = [self.col]
         if not self.want("colour", outs):
@@ -295,6 +375,8 @@ class Pipeline:
         t0 = time.time()
         if a.colour_engine == "v3":
             return self._colour_v3(t0)
+        if not a.dry_run and not Path(str(self.gen) + ".json").exists():
+            raise StageError("colour", EXIT_INPUT, "colour engine v2 needs the generation sidecar; use the default v3 for --generated videos")
         cfg = a.colour_config
         if cfg is None:
             cfg = self.run_dir / "student3_config.json"
@@ -324,8 +406,10 @@ class Pipeline:
         out = self.run_dir / "student3_v3"
         cfg = a.colour_config or (ROOT / "student3_v3" / "configs" / f"{self.role}_1930s.json")
         cmd = [a.python, "-m", "student3_v3.run", "--input", self.gen,
-               "--densepose", self.clip / "control_densepose_real.mp4", "--config", cfg, "--out-dir", out,
-               "--sidecar", str(self.gen) + ".json"]
+               "--densepose", self.clip / "control_densepose_real.mp4", "--config", cfg, "--out-dir", out]
+        sidecar = Path(str(self.gen) + ".json")
+        if sidecar.exists() or a.dry_run:
+            cmd += ["--sidecar", sidecar]
         parts = self.clip / "densepose_real_parts.npz"
         if parts.exists():
             cmd += ["--parts-npz", parts]
@@ -339,6 +423,9 @@ class Pipeline:
             shutil.copyfile(out / "colourised_master.mp4", self.col)
             proc = json.load(open(out / "processing.json"))
             ev = json.load(open(out / "evaluation.json"))
+            if not sidecar.exists():
+                write_derived_sidecar(proc, sidecar, self.role)
+                log("colour: no generation sidecar; wrote one from Student 3 v3's detected frame layout")
             extra.update({"alignment": proc.get("alignment"), "era_outputs": proc["outputs"].get("era"),
                           "technical_verdict": ev.get("technical_verdict"),
                           "mask_coverage": ev.get("mask_coverage", {}).get("player_pixels_with_a_class_mean")})
@@ -361,14 +448,25 @@ class Pipeline:
         elif self.a.dry_run:
             kf = 3.5
         else:
-            kf = keyframe_fps(json.load(open(str(self.gen) + ".json")), self._src_fps())
+            side = json.load(open(str(self.gen) + ".json"))
+            kf = keyframe_fps(side, self._src_fps())
+            # held frames (Milestone 3 padding) would freeze the motion; keep one frame per keyframe
+            keys = self.run_dir / "_keyframes.mp4"
+            n = keyframe_video(src, keys, side["output_frame_to_keyframe"])
+            log(f"retime: {n} keyframes at {kf} fps (real time) -> {self.a.final_fps} fps")
+            src = keys
         F = self.a.final_fps
         # play keyframes at their real-time rate, then motion-interpolate up to F
-        vf = (f"setpts=N/({kf}*TB),minterpolate=fps={F}:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,"
-              f"format=yuv420p")
+        if self.a.retime_mode == "hold":
+            vf = f"setpts=N/({kf}*TB),fps={F},format=yuv420p"
+            note = "each generated frame is repeated to reach the final fps (no blending, no ghosting)"
+        else:
+            vf = (f"setpts=N/({kf}*TB),minterpolate=fps={F}:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,"
+                  f"format=yuv420p")
+            note = "frames between keyframes are motion-interpolated by ffmpeg, not generated"
         ffmpeg("retime", ["-i", src, "-vf", vf, "-r", F, "-c:v", "libx264", "-crf", "16", self.final], self.a.dry_run)
         self.record("retime", "done", t0, input=str(src), keyframe_fps=kf, final_fps=F,
-                    note="frames between keyframes are motion-interpolated by ffmpeg, not generated")
+                    mode=self.a.retime_mode, note=note)
 
     def demo(self):
         outs = [self.demo_path]
@@ -451,7 +549,7 @@ class Pipeline:
 def main(argv=None):
     a = build_parser().parse_args(argv)
     # absolute paths: some stages run with cwd=ROOT
-    for k in ("image", "reference_video", "clips_root", "runs_root", "colour_config"):
+    for k in ("image", "reference_video", "clips_root", "runs_root", "colour_config", "generated"):
         if getattr(a, k) is not None:
             setattr(a, k, getattr(a, k).expanduser().resolve())
     pl = Pipeline(a)

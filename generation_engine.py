@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 from PIL import Image
 from diffusers import DiffusionPipeline, MotionAdapter, ControlNetModel, DDIMScheduler
+from diffusers import AnimateDiffControlNetPipeline
 from diffusers.utils import export_to_video
 
 class Milestone3Engine:
@@ -32,13 +33,30 @@ class Milestone3Engine:
         )
 
         print("3/4 Building AnimateDiff + ControlNet Pipeline...")
-        self.pipe = DiffusionPipeline.from_pretrained(
-            "runwayml/stable-diffusion-v1-5",
-            motion_adapter=motion_adapter,
-            controlnet=controlnet,
-            custom_pipeline="pipeline_animatediff_controlnet",
-            torch_dtype=self.dtype
-        )
+        # runwayml/stable-diffusion-v1-5 was taken down from Hugging Face (404); it still loads from a local
+        # cache if it was downloaded before. Otherwise fall back to the maintained mirror. SD15_MODEL overrides.
+        import os
+        candidates = [os.environ["SD15_MODEL"]] if os.environ.get("SD15_MODEL") else [
+            "runwayml/stable-diffusion-v1-5", "stable-diffusion-v1-5/stable-diffusion-v1-5"]
+        last_err = None
+        for model_id in candidates:
+            try:
+                # Official diffusers pipeline. The old community "pipeline_animatediff_controlnet" does not
+                # repeat prompt embeds per frame for the UNet, which diffusers>=0.30 UNetMotionModel expects:
+                # it crashed with "size of tensor a (49152) must match ... (3072)". See docs/RUN_LOG.md.
+                self.pipe = AnimateDiffControlNetPipeline.from_pretrained(
+                    model_id,
+                    motion_adapter=motion_adapter,
+                    controlnet=controlnet,
+                    torch_dtype=self.dtype
+                )
+                print(f"   base model: {model_id}")
+                break
+            except Exception as e:  # repo missing / not cached
+                last_err = e
+                print(f"   could not load {model_id}: {type(e).__name__}")
+        else:
+            raise RuntimeError(f"model: could not load Stable Diffusion 1.5 ({last_err}); set SD15_MODEL to a local path or repo id")
 
         print("4/4 Loading IP-Adapter...")
         self.pipe.load_ip_adapter(

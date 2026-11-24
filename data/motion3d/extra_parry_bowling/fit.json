@@ -1,0 +1,108 @@
+{
+ "frames_out": 38,
+ "detections_dropped_outside_camera_frame": 0,
+ "frames_without_visible_feet": 0,
+ "source_frames": [
+  0.0,
+  37.0
+ ],
+ "lr_swaps_fixed": 0,
+ "px_per_metre_mediapipe": 191.2,
+ "body_height_px": 279.1,
+ "bone_lengths_px": {
+  "ear_width": 19.7,
+  "eye_ear": 14.1,
+  "eye_width": 8.4,
+  "foot": 32.4,
+  "forearm": 31.3,
+  "heel": 11.5,
+  "hip_width": 28.0,
+  "neck_nose": 69.9,
+  "nose_ear": 18.9,
+  "nose_eye": 7.3,
+  "shin": 94.1,
+  "shoulder_width": 49.3,
+  "sole": 35.1,
+  "thigh": 77.8,
+  "torso_side": 82.6,
+  "upper_arm": 60.4
+ },
+ "max_bone_length_error_px": 0.17,
+ "contact_frames_per_foot_point": {
+  "right_ankle": 0,
+  "right_heel": 3,
+  "right_toe": 6,
+  "left_ankle": 0,
+  "left_heel": 0,
+  "left_toe": 3
+ },
+ "ground_reference_steps": [
+  [
+   27.5,
+   646.0
+  ],
+  [
+   32.5,
+   641.8
+  ],
+  [
+   36.5,
+   627.0
+  ],
+  [
+   36.5,
+   635.8
+  ]
+ ],
+ "planted_runs": 4,
+ "max_planted_foot_drift_px": 0.06,
+ "max_below_ground_px_seen_feet": 0.01,
+ "energy_pass1": {
+  "detections": 2122.4,
+  "depth": 126.8,
+  "bones": 6.2,
+  "smooth": 864.9
+ },
+ "energy_pass2": {
+  "detections": 2117.8,
+  "depth": 155.2,
+  "bones": 6.5,
+  "smooth": 859.5,
+  "speed_cap": 0.0,
+  "ground": 0.0,
+  "contact_still": 0.1
+ },
+ "jerk_raw_vs_fit": {
+  "raw_median": 5.95,
+  "fit_median": 2.62,
+  "raw_p99": 69.0,
+  "fit_p99": 12.4
+ },
+ "max_speed_ratio_raw_vs_fit": {
+  "raw_max_over_median": 8.3,
+  "fit_max_over_median": 2.8
+ },
+ "frames_with_detections": {
+  "nose": 38,
+  "right_eye": 38,
+  "left_eye": 38,
+  "right_ear": 38,
+  "left_ear": 38,
+  "right_shoulder": 38,
+  "right_elbow": 38,
+  "right_wrist": 38,
+  "left_shoulder": 38,
+  "left_elbow": 38,
+  "left_wrist": 38,
+  "right_hip": 38,
+  "right_knee": 38,
+  "right_ankle": 38,
+  "left_hip": 38,
+  "left_knee": 38,
+  "left_ankle": 38,
+  "right_heel": 38,
+  "right_toe": 38,
+  "left_heel": 38,
+  "left_toe": 38
+ }
+}

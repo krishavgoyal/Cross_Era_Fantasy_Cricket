@@ -1,0 +1,40 @@
+{
+ "generated": "outputs/animate/mcgrath_cummins.mp4",
+ "target": "animate/jobs/mcgrath_cummins/target_pose.json",
+ "frames": 45,
+ "pck@0.05": 0.7633,
+ "pck@0.1": 0.8544,
+ "pck@0.2": 0.8962,
+ "per_joint_pck@0.1": {
+  "nose": 1.0,
+  "neck": 1.0,
+  "right_shoulder": 1.0,
+  "right_elbow": 0.422,
+  "right_wrist": 0.311,
+  "left_shoulder": 1.0,
+  "left_elbow": 0.773,
+  "left_wrist": 0.711,
+  "right_hip": 0.978,
+  "right_knee": 0.4,
+  "right_ankle": 0.971,
+  "left_hip": 1.0,
+  "left_knee": 0.867,
+  "left_ankle": 1.0,
+  "right_eye": 1.0,
+  "left_eye": 1.0,
+  "right_ear": 1.0,
+  "left_ear": 1.0
+ },
+ "complete_body_frames": 0.5778,
+ "face_detected_frames": 1.0,
+ "merged_limb_frames": 0.0444,
+ "merged_limb_frame_list": [
+  2,
+  44
+ ],
+ "player_found_frames": 1.0,
+ "silhouette_iou_mean": 0.8438,
+ "silhouette_iou_min": 0.6693,
+ "silhouette_drops_below_0.7": 1,
+ "area_change_max": 0.2318
+}

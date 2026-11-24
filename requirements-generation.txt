@@ -8,7 +8,7 @@ imageio>=2.34
 imageio-ffmpeg>=0.5
 # Models are downloaded from Hugging Face on first run:
 #   runwayml/stable-diffusion-v1-5, guoyww/animatediff-motion-adapter-v1-5-2, MnLgt/densepose, h94/IP-Adapter
-# The "pipeline_animatediff_controlnet" community pipeline is fetched by diffusers at load time.
+# Uses diffusers' built-in AnimateDiffControlNetPipeline (the community pipeline broke on diffusers>=0.30).
 
 # Student 3 (colour): see student3_improved/requirements.txt; SAM2 is installed separately.
 # DensePose stage: separate env with detectron2 + projects/DensePose (see INTEGRATION.md).

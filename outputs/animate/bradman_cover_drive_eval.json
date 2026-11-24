@@ -1,0 +1,41 @@
+{
+ "generated": "outputs/animate/bradman_cover_drive.mp4",
+ "target": "animate/jobs/bradman_cover_drive/target_pose.json",
+ "frames": 139,
+ "pck@0.05": 0.7904,
+ "pck@0.1": 0.9482,
+ "pck@0.2": 0.9814,
+ "per_joint_pck@0.1": {
+  "nose": 1.0,
+  "neck": 1.0,
+  "right_shoulder": 1.0,
+  "right_elbow": 0.699,
+  "right_wrist": 0.747,
+  "left_shoulder": 1.0,
+  "left_elbow": 0.993,
+  "left_wrist": 0.712,
+  "right_hip": 0.928,
+  "right_knee": 0.856,
+  "right_ankle": 0.993,
+  "left_hip": 1.0,
+  "left_knee": 1.0,
+  "left_ankle": 1.0,
+  "right_eye": 1.0,
+  "left_eye": 1.0,
+  "right_ear": 1.0,
+  "left_ear": 1.0
+ },
+ "complete_body_frames": 0.8561,
+ "face_detected_frames": 1.0,
+ "merged_limb_frames": 0.0216,
+ "merged_limb_frame_list": [
+  62,
+  70,
+  79
+ ],
+ "player_found_frames": 1.0,
+ "silhouette_iou_mean": 0.9561,
+ "silhouette_iou_min": 0.8461,
+ "silhouette_drops_below_0.7": 0,
+ "area_change_max": 0.095
+}

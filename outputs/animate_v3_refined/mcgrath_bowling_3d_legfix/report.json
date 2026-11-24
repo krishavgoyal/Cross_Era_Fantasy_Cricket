@@ -1,0 +1,333 @@
+{
+ "job": "mcgrath_bowling_3d_legfix",
+ "steps": {
+  "0_original": {
+   "video": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/outputs/animate_v3_refined/mcgrath_bowling_3d_legfix/step0_original.mp4",
+   "frames": 100,
+   "size": [
+    560,
+    632
+   ],
+   "accuracy": {
+    "pck@0.05": 0.4822,
+    "pck@0.1": 0.6322,
+    "pck@0.2": 0.7122,
+    "pck@0.1_view_tolerant": 0.8656,
+    "frames_detected_mirrored": 60
+   },
+   "limb_rigidity": {
+    "length_ratio_robust_cv_median": 0.142,
+    "length_ratio_robust_cv_worst": 0.208
+   },
+   "fluidity": {
+    "joint_accel_p90_per_torso": 0.223,
+    "joint_accel_spikes_share": 0.0675,
+    "colour_flicker_mean_dE": 0.246,
+    "colour_flicker_p99_dE": 0.838,
+    "background_flicker_mean": 1.049
+   },
+   "object_permanence": {
+    "complete_body_frames": 0.75,
+    "face_frames": 0.93,
+    "player_found_frames": 1.0,
+    "outline_drops_below_0.7": 4
+   },
+   "distortions": {
+    "merged_limb_frames": 0.26,
+    "outline_iou_min": 0.6241,
+    "outline_iou_mean": 0.8093,
+    "outline_area_jump_max": 0.1016
+   },
+   "colour_realism": {
+    "player_mean_dE_to_photo": 11.32,
+    "background_mean_dE_to_photo": 2.2,
+    "player_hist_dist": 0.223,
+    "background_hist_dist": 0.111,
+    "player_foreign_colour_share": 0.0889,
+    "background_foreign_colour_share": 0.0076,
+    "saturation_video": 30.26,
+    "saturation_photo": 29.56,
+    "banding_flat_share_video": 0.405,
+    "banding_flat_share_photo": 0.157
+   },
+   "scores_0_100": {
+    "accuracy": 63.2,
+    "limb_rigidity": 57.4,
+    "fluidity": 27.1,
+    "object_permanence": 80.6,
+    "distortions(no=100)": 0.0,
+    "colour_realism": 64.1
+   }
+  },
+  "1_512": {
+   "video": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/outputs/animate_v3_refined/mcgrath_bowling_3d_legfix/step1_512.mp4",
+   "frames": 100,
+   "size": [
+    512,
+    512
+   ],
+   "accuracy": {
+    "pck@0.05": 0.4867,
+    "pck@0.1": 0.6356,
+    "pck@0.2": 0.7156,
+    "pck@0.1_view_tolerant": 0.8711,
+    "frames_detected_mirrored": 60
+   },
+   "limb_rigidity": {
+    "length_ratio_robust_cv_median": 0.148,
+    "length_ratio_robust_cv_worst": 0.205
+   },
+   "fluidity": {
+    "joint_accel_p90_per_torso": 0.26,
+    "joint_accel_spikes_share": 0.0743,
+    "colour_flicker_mean_dE": 0.186,
+    "colour_flicker_p99_dE": 1.129,
+    "background_flicker_mean": 0.826
+   },
+   "object_permanence": {
+    "complete_body_frames": 0.77,
+    "face_frames": 0.93,
+    "player_found_frames": 1.0,
+    "outline_drops_below_0.7": 5
+   },
+   "distortions": {
+    "merged_limb_frames": 0.27,
+    "outline_iou_min": 0.6215,
+    "outline_iou_mean": 0.8072,
+    "outline_area_jump_max": 0.0967
+   },
+   "colour_realism": {
+    "player_mean_dE_to_photo": 12.57,
+    "background_mean_dE_to_photo": 3.9,
+    "player_hist_dist": 0.261,
+    "background_hist_dist": 0.225,
+    "player_foreign_colour_share": 0.1021,
+    "background_foreign_colour_share": 0.0092,
+    "saturation_video": 34.11,
+    "saturation_photo": 31.99,
+    "banding_flat_share_video": 0.494,
+    "banding_flat_share_photo": 0.184
+   },
+   "scores_0_100": {
+    "accuracy": 63.6,
+    "limb_rigidity": 55.6,
+    "fluidity": 19.5,
+    "object_permanence": 79.4,
+    "distortions(no=100)": 0.0,
+    "colour_realism": 56.8
+   },
+   "info": {
+    "frames_in": 100,
+    "frames_out": 100,
+    "window": [
+     0,
+     100
+    ],
+    "crop": "fixed",
+    "duration_s": 4.17,
+    "size": [
+     512,
+     512
+    ]
+   },
+   "rejected": []
+  },
+  "2_colour": {
+   "video": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/outputs/animate_v3_refined/mcgrath_bowling_3d_legfix/step2_colour.mp4",
+   "frames": 100,
+   "size": [
+    512,
+    512
+   ],
+   "accuracy": {
+    "pck@0.05": 0.4894,
+    "pck@0.1": 0.6406,
+    "pck@0.2": 0.7194,
+    "pck@0.1_view_tolerant": 0.8706,
+    "frames_detected_mirrored": 57
+   },
+   "limb_rigidity": {
+    "length_ratio_robust_cv_median": 0.155,
+    "length_ratio_robust_cv_worst": 0.239
+   },
+   "fluidity": {
+    "joint_accel_p90_per_torso": 0.262,
+    "joint_accel_spikes_share": 0.0754,
+    "colour_flicker_mean_dE": 0.166,
+    "colour_flicker_p99_dE": 0.922,
+    "background_flicker_mean": 0.727
+   },
+   "object_permanence": {
+    "complete_body_frames": 0.75,
+    "face_frames": 0.94,
+    "player_found_frames": 1.0,
+    "outline_drops_below_0.7": 4
+   },
+   "distortions": {
+    "merged_limb_frames": 0.21,
+    "outline_iou_min": 0.6195,
+    "outline_iou_mean": 0.8072,
+    "outline_area_jump_max": 0.1193
+   },
+   "colour_realism": {
+    "player_mean_dE_to_photo": 3.74,
+    "background_mean_dE_to_photo": 1.05,
+    "player_hist_dist": 0.213,
+    "background_hist_dist": 0.044,
+    "player_foreign_colour_share": 0.0533,
+    "background_foreign_colour_share": 0.0037,
+    "saturation_video": 33.18,
+    "saturation_photo": 31.99,
+    "banding_flat_share_video": 0.521,
+    "banding_flat_share_photo": 0.184
+   },
+   "scores_0_100": {
+    "accuracy": 64.1,
+    "limb_rigidity": 53.5,
+    "fluidity": 19.5,
+    "object_permanence": 80.8,
+    "distortions(no=100)": 10.6,
+    "colour_realism": 84.6
+   },
+   "info": {
+    "mode": "colour transfer + palette",
+    "foreign_pixels_pulled_share": 0.0743,
+    "player_matrix_det": 0.677
+   },
+   "rejected": []
+  },
+  "3_stable": {
+   "video": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/outputs/animate_v3_refined/mcgrath_bowling_3d_legfix/step3_stable.mp4",
+   "frames": 100,
+   "size": [
+    512,
+    512
+   ],
+   "accuracy": {
+    "pck@0.05": 0.4772,
+    "pck@0.1": 0.6394,
+    "pck@0.2": 0.7222,
+    "pck@0.1_view_tolerant": 0.88,
+    "frames_detected_mirrored": 60
+   },
+   "limb_rigidity": {
+    "length_ratio_robust_cv_median": 0.142,
+    "length_ratio_robust_cv_worst": 0.221
+   },
+   "fluidity": {
+    "joint_accel_p90_per_torso": 0.279,
+    "joint_accel_spikes_share": 0.076,
+    "colour_flicker_mean_dE": 0.109,
+    "colour_flicker_p99_dE": 0.425,
+    "background_flicker_mean": 0.506
+   },
+   "object_permanence": {
+    "complete_body_frames": 0.73,
+    "face_frames": 0.95,
+    "player_found_frames": 1.0,
+    "outline_drops_below_0.7": 4
+   },
+   "distortions": {
+    "merged_limb_frames": 0.25,
+    "outline_iou_min": 0.6264,
+    "outline_iou_mean": 0.8067,
+    "outline_area_jump_max": 0.1015
+   },
+   "colour_realism": {
+    "player_mean_dE_to_photo": 3.66,
+    "background_mean_dE_to_photo": 1.03,
+    "player_hist_dist": 0.212,
+    "background_hist_dist": 0.044,
+    "player_foreign_colour_share": 0.0512,
+    "background_foreign_colour_share": 0.004,
+    "saturation_video": 33.21,
+    "saturation_photo": 31.99,
+    "banding_flat_share_video": 0.551,
+    "banding_flat_share_photo": 0.184
+   },
+   "scores_0_100": {
+    "accuracy": 63.9,
+    "limb_rigidity": 57.4,
+    "fluidity": 17.7,
+    "object_permanence": 80.2,
+    "distortions(no=100)": 0.0,
+    "colour_realism": 85.0
+   },
+   "info": {
+    "colour_smoothing_sigma_frames": 2.0,
+    "background_median_window": 9,
+    "background_blend": 0.6
+   },
+   "rejected": [
+    "distortions(no=100) 10.6 -> 0.0"
+   ]
+  },
+  "4_grain": {
+   "video": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/outputs/animate_v3_refined/mcgrath_bowling_3d_legfix/step4_grain.mp4",
+   "frames": 100,
+   "size": [
+    512,
+    512
+   ],
+   "accuracy": {
+    "pck@0.05": 0.4856,
+    "pck@0.1": 0.6428,
+    "pck@0.2": 0.7206,
+    "pck@0.1_view_tolerant": 0.8783,
+    "frames_detected_mirrored": 58
+   },
+   "limb_rigidity": {
+    "length_ratio_robust_cv_median": 0.156,
+    "length_ratio_robust_cv_worst": 0.228
+   },
+   "fluidity": {
+    "joint_accel_p90_per_torso": 0.232,
+    "joint_accel_spikes_share": 0.0686,
+    "colour_flicker_mean_dE": 0.169,
+    "colour_flicker_p99_dE": 0.941,
+    "background_flicker_mean": 0.868
+   },
+   "object_permanence": {
+    "complete_body_frames": 0.75,
+    "face_frames": 0.94,
+    "player_found_frames": 1.0,
+    "outline_drops_below_0.7": 4
+   },
+   "distortions": {
+    "merged_limb_frames": 0.23,
+    "outline_iou_min": 0.6234,
+    "outline_iou_mean": 0.8073,
+    "outline_area_jump_max": 0.1152
+   },
+   "colour_realism": {
+    "player_mean_dE_to_photo": 4.4,
+    "background_mean_dE_to_photo": 1.89,
+    "player_hist_dist": 0.211,
+    "background_hist_dist": 0.082,
+    "player_foreign_colour_share": 0.0434,
+    "background_foreign_colour_share": 0.0044,
+    "saturation_video": 33.68,
+    "saturation_photo": 31.99,
+    "banding_flat_share_video": 0.504,
+    "banding_flat_share_photo": 0.184
+   },
+   "scores_0_100": {
+    "accuracy": 64.3,
+    "limb_rigidity": 53.2,
+    "fluidity": 27.0,
+    "object_permanence": 80.8,
+    "distortions(no=100)": 4.9,
+    "colour_realism": 82.7
+   },
+   "info": {
+    "photo_grain": 1.48,
+    "clip_grain": 0.0,
+    "added": 1.48
+   },
+   "rejected": [
+    "distortions(no=100) 10.6 -> 4.9"
+   ]
+  }
+ },
+ "final": "step2_colour.mp4"
+}

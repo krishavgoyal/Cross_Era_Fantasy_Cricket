@@ -12,3 +12,41 @@ checkpoints/*.onnx
 # master pipeline runs
 runs/
 *.dwpose.json
+colab_results/
+kaggle_results/
+kaggle_results_*/
+# large motion reference videos (re-download: python tools/fetch_references.py)
+data/motion_videos/
+kaggle_results*/
+
+# Third-party media we may not redistribute (the repository is public). Kept locally only.
+# Watermarked stock photos of McGrath (Getty / Alamy / sporting-heroes) and anything made directly from them
+data/reference_players/glenn_mcgrath/
+data/historical_images/bowler_new.jpg
+animate/jobs/*/ref.png
+animate/jobs/*/preview.jpg
+animate/jobs/*/plate.png
+animate/jobs/*/photo_no_bat.png
+animate/jobs/*/fg_layer.png
+animate/jobs/*/ball_sprite.npy
+animate/jobs/*/bat_sprite.npy
+outputs/animate_v3_refined/*/ref_512.png
+# Broadcast / YouTube footage (motion source only) and videos that show its frames
+data/raw_clips/bowler_new_cummins.mp4
+data/processed_clips/bowler_new_cummins/source_512.mp4
+data/processed_clips/bowler_new_cummins/_before_patch/
+data/motion3d/*/clip*/source_512.mp4
+data/motion3d/bowler_new_cummins/overlay.mp4
+data/motion3d/bowler_new_cummins/multiview.mp4
+data/motion3d/bowler_new_cummins/multiview_sheet.jpg
+data/motion3d/good_cover_drive_final/overlay.mp4
+data/motion3d/good_cover_drive_final/multiview.mp4
+data/motion3d/good_cover_drive_final/multiview_sheet.jpg
+outputs/motion3d/skeletons/bowler_new_cummins/overlay.mp4
+outputs/motion3d/skeletons/bowler_new_cummins/multiview.mp4
+outputs/motion3d/skeletons/bowler_new_cummins/multiview_sheet.jpg
+outputs/motion3d/skeletons/good_cover_drive_final/overlay.mp4
+outputs/motion3d/skeletons/good_cover_drive_final/multiview.mp4
+outputs/motion3d/skeletons/good_cover_drive_final/multiview_sheet.jpg
+outputs/**/*_demo.mp4
+outputs/**/*_sheet.jpg

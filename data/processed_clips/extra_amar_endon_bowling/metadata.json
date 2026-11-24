@@ -1,0 +1,679 @@
+{
+ "schema_version": "1.1.0",
+ "clip_id": "extra_amar_endon_bowling",
+ "action_type": "bowling",
+ "role": "bowler",
+ "source": {
+  "path": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/data/raw_clips/extra_amar_endon_bowling.mp4",
+  "source_fps": 24.0,
+  "source_frame_count": 38,
+  "source_resolution": [
+   720,
+   1280
+  ],
+  "original": "data/motion_videos/batting/amar_kala_batting_2025.webm",
+  "window_s": [
+   9.6,
+   11.2
+  ],
+  "credit": "bowler in 'Amar Kala Batting Video 2025' (DrRevathi25, CC BY-SA 4.0)",
+  "view": "end-on, from behind the bowler"
+ },
+ "processed": {
+  "fps": 24.0,
+  "frame_count": 38,
+  "resolution": [
+   512,
+   512
+  ],
+  "made_by": "motion3d/extra.py (YOLO person follow + DWPose 1024)"
+ },
+ "frames": [
+  {
+   "frame_index": 0,
+   "source_frame_index": 0,
+   "timestamp_ms": 0.0,
+   "bbox_source_xyxy_px": [
+    237.5,
+    776.0,
+    304.6,
+    928.0
+   ],
+   "crop_window_source_xyxy_px": [
+    117.76,
+    696.23,
+    425.79,
+    1004.26
+   ]
+  },
+  {
+   "frame_index": 1,
+   "source_frame_index": 1,
+   "timestamp_ms": 41.67,
+   "bbox_source_xyxy_px": [
+    238.7,
+    770.1,
+    306.3,
+    927.4
+   ],
+   "crop_window_source_xyxy_px": [
+    118.25,
+    694.76,
+    426.28,
+    1002.79
+   ]
+  },
+  {
+   "frame_index": 2,
+   "source_frame_index": 2,
+   "timestamp_ms": 83.33,
+   "bbox_source_xyxy_px": [
+    237.2,
+    766.3,
+    309.3,
+    926.6
+   ],
+   "crop_window_source_xyxy_px": [
+    118.78,
+    692.97,
+    426.81,
+    1001.0
+   ]
+  },
+  {
+   "frame_index": 3,
+   "source_frame_index": 3,
+   "timestamp_ms": 125.0,
+   "bbox_source_xyxy_px": [
+    235.6,
+    762.4,
+    311.4,
+    926.9
+   ],
+   "crop_window_source_xyxy_px": [
+    119.66,
+    690.59,
+    427.69,
+    998.62
+   ]
+  },
+  {
+   "frame_index": 4,
+   "source_frame_index": 4,
+   "timestamp_ms": 166.67,
+   "bbox_source_xyxy_px": [
+    235.2,
+    758.9,
+    312.2,
+    927.1
+   ],
+   "crop_window_source_xyxy_px": [
+    120.41,
+    688.26,
+    428.44,
+    996.29
+   ]
+  },
+  {
+   "frame_index": 5,
+   "source_frame_index": 5,
+   "timestamp_ms": 208.33,
+   "bbox_source_xyxy_px": [
+    237.3,
+    753.1,
+    313.5,
+    927.1
+   ],
+   "crop_window_source_xyxy_px": [
+    120.88,
+    685.76,
+    428.91,
+    993.79
+   ]
+  },
+  {
+   "frame_index": 6,
+   "source_frame_index": 6,
+   "timestamp_ms": 250.0,
+   "bbox_source_xyxy_px": [
+    238.8,
+    747.3,
+    313.8,
+    927.0
+   ],
+   "crop_window_source_xyxy_px": [
+    121.22,
+    683.1,
+    429.25,
+    991.13
+   ]
+  },
+  {
+   "frame_index": 7,
+   "source_frame_index": 7,
+   "timestamp_ms": 291.67,
+   "bbox_source_xyxy_px": [
+    238.8,
+    741.1,
+    312.3,
+    926.8
+   ],
+   "crop_window_source_xyxy_px": [
+    121.67,
+    680.07,
+    429.7,
+    988.1
+   ]
+  },
+  {
+   "frame_index": 8,
+   "source_frame_index": 8,
+   "timestamp_ms": 333.33,
+   "bbox_source_xyxy_px": [
+    239.0,
+    736.1,
+    311.3,
+    926.6
+   ],
+   "crop_window_source_xyxy_px": [
+    121.77,
+    676.94,
+    429.8,
+    984.97
+   ]
+  },
+  {
+   "frame_index": 9,
+   "source_frame_index": 9,
+   "timestamp_ms": 375.0,
+   "bbox_source_xyxy_px": [
+    241.2,
+    728.7,
+    310.8,
+    927.0
+   ],
+   "crop_window_source_xyxy_px": [
+    121.72,
+    673.87,
+    429.75,
+    981.89
+   ]
+  },
+  {
+   "frame_index": 10,
+   "source_frame_index": 10,
+   "timestamp_ms": 416.67,
+   "bbox_source_xyxy_px": [
+    240.1,
+    722.8,
+    311.7,
+    926.1
+   ],
+   "crop_window_source_xyxy_px": [
+    122.01,
+    669.82,
+    430.03,
+    977.85
+   ]
+  },
+  {
+   "frame_index": 11,
+   "source_frame_index": 11,
+   "timestamp_ms": 458.33,
+   "bbox_source_xyxy_px": [
+    238.6,
+    717.5,
+    313.4,
+    926.1
+   ],
+   "crop_window_source_xyxy_px": [
+    122.53,
+    661.43,
+    430.56,
+    969.46
+   ]
+  },
+  {
+   "frame_index": 12,
+   "source_frame_index": 12,
+   "timestamp_ms": 500.0,
+   "bbox_source_xyxy_px": [
+    239.4,
+    709.7,
+    314.7,
+    917.8
+   ],
+   "crop_window_source_xyxy_px": [
+    123.54,
+    653.04,
+    431.57,
+    961.07
+   ]
+  },
+  {
+   "frame_index": 13,
+   "source_frame_index": 13,
+   "timestamp_ms": 541.67,
+   "bbox_source_xyxy_px": [
+    243.1,
+    673.3,
+    312.4,
+    905.5
+   ],
+   "crop_window_source_xyxy_px": [
+    125.37,
+    647.67,
+    433.39,
+    955.7
+   ]
+  },
+  {
+   "frame_index": 14,
+   "source_frame_index": 14,
+   "timestamp_ms": 583.33,
+   "bbox_source_xyxy_px": [
+    248.5,
+    666.1,
+    313.6,
+    905.7
+   ],
+   "crop_window_source_xyxy_px": [
+    128.13,
+    642.18,
+    436.16,
+    950.21
+   ]
+  },
+  {
+   "frame_index": 15,
+   "source_frame_index": 15,
+   "timestamp_ms": 625.0,
+   "bbox_source_xyxy_px": [
+    253.4,
+    689.1,
+    316.7,
+    906.1
+   ],
+   "crop_window_source_xyxy_px": [
+    131.07,
+    635.83,
+    439.1,
+    943.86
+   ]
+  },
+  {
+   "frame_index": 16,
+   "source_frame_index": 16,
+   "timestamp_ms": 666.67,
+   "bbox_source_xyxy_px": [
+    259.6,
+    685.4,
+    320.1,
+    903.3
+   ],
+   "crop_window_source_xyxy_px": [
+    133.82,
+    631.36,
+    441.85,
+    939.39
+   ]
+  },
+  {
+   "frame_index": 17,
+   "source_frame_index": 17,
+   "timestamp_ms": 708.33,
+   "bbox_source_xyxy_px": [
+    259.8,
+    672.7,
+    323.7,
+    891.3
+   ],
+   "crop_window_source_xyxy_px": [
+    135.69,
+    624.37,
+    443.72,
+    932.4
+   ]
+  },
+  {
+   "frame_index": 18,
+   "source_frame_index": 18,
+   "timestamp_ms": 750.0,
+   "bbox_source_xyxy_px": [
+    258.5,
+    670.4,
+    324.6,
+    863.8
+   ],
+   "crop_window_source_xyxy_px": [
+    136.56,
+    615.73,
+    444.59,
+    923.76
+   ]
+  },
+  {
+   "frame_index": 19,
+   "source_frame_index": 19,
+   "timestamp_ms": 791.67,
+   "bbox_source_xyxy_px": [
+    257.6,
+    655.1,
+    323.2,
+    846.8
+   ],
+   "crop_window_source_xyxy_px": [
+    136.28,
+    607.81,
+    444.31,
+    915.84
+   ]
+  },
+  {
+   "frame_index": 20,
+   "source_frame_index": 20,
+   "timestamp_ms": 833.33,
+   "bbox_source_xyxy_px": [
+    258.4,
+    653.6,
+    320.3,
+    855.1
+   ],
+   "crop_window_source_xyxy_px": [
+    135.71,
+    601.0,
+    443.74,
+    909.03
+   ]
+  },
+  {
+   "frame_index": 21,
+   "source_frame_index": 21,
+   "timestamp_ms": 875.0,
+   "bbox_source_xyxy_px": [
+    258.6,
+    650.0,
+    318.3,
+    859.6
+   ],
+   "crop_window_source_xyxy_px": [
+    135.19,
+    596.34,
+    443.22,
+    904.37
+   ]
+  },
+  {
+   "frame_index": 22,
+   "source_frame_index": 22,
+   "timestamp_ms": 916.67,
+   "bbox_source_xyxy_px": [
+    258.2,
+    632.2,
+    319.6,
+    863.7
+   ],
+   "crop_window_source_xyxy_px": [
+    134.25,
+    595.56,
+    442.28,
+    903.59
+   ]
+  },
+  {
+   "frame_index": 23,
+   "source_frame_index": 23,
+   "timestamp_ms": 958.33,
+   "bbox_source_xyxy_px": [
+    259.1,
+    619.5,
+    318.7,
+    868.1
+   ],
+   "crop_window_source_xyxy_px": [
+    133.42,
+    598.01,
+    441.45,
+    906.04
+   ]
+  },
+  {
+   "frame_index": 24,
+   "source_frame_index": 24,
+   "timestamp_ms": 1000.0,
+   "bbox_source_xyxy_px": [
+    250.3,
+    625.9,
+    321.1,
+    868.1
+   ],
+   "crop_window_source_xyxy_px": [
+    133.05,
+    601.16,
+    441.08,
+    909.19
+   ]
+  },
+  {
+   "frame_index": 25,
+   "source_frame_index": 25,
+   "timestamp_ms": 1041.67,
+   "bbox_source_xyxy_px": [
+    250.4,
+    664.5,
+    319.9,
+    868.7
+   ],
+   "crop_window_source_xyxy_px": [
+    133.44,
+    605.96,
+    441.47,
+    913.99
+   ]
+  },
+  {
+   "frame_index": 26,
+   "source_frame_index": 26,
+   "timestamp_ms": 1083.33,
+   "bbox_source_xyxy_px": [
+    258.4,
+    672.2,
+    314.8,
+    868.8
+   ],
+   "crop_window_source_xyxy_px": [
+    133.64,
+    611.56,
+    441.67,
+    919.59
+   ]
+  },
+  {
+   "frame_index": 27,
+   "source_frame_index": 27,
+   "timestamp_ms": 1125.0,
+   "bbox_source_xyxy_px": [
+    264.3,
+    677.0,
+    317.4,
+    866.9
+   ],
+   "crop_window_source_xyxy_px": [
+    134.39,
+    611.17,
+    442.42,
+    919.19
+   ]
+  },
+  {
+   "frame_index": 28,
+   "source_frame_index": 28,
+   "timestamp_ms": 1166.67,
+   "bbox_source_xyxy_px": [
+    259.9,
+    686.8,
+    319.9,
+    856.7
+   ],
+   "crop_window_source_xyxy_px": [
+    135.29,
+    606.15,
+    443.32,
+    914.18
+   ]
+  },
+  {
+   "frame_index": 29,
+   "source_frame_index": 29,
+   "timestamp_ms": 1208.33,
+   "bbox_source_xyxy_px": [
+    257.6,
+    642.8,
+    321.3,
+    847.3
+   ],
+   "crop_window_source_xyxy_px": [
+    136.14,
+    606.36,
+    444.17,
+    914.39
+   ]
+  },
+  {
+   "frame_index": 30,
+   "source_frame_index": 30,
+   "timestamp_ms": 1250.0,
+   "bbox_source_xyxy_px": [
+    257.7,
+    638.2,
+    321.7,
+    844.9
+   ],
+   "crop_window_source_xyxy_px": [
+    137.03,
+    605.86,
+    445.05,
+    913.89
+   ]
+  },
+  {
+   "frame_index": 31,
+   "source_frame_index": 31,
+   "timestamp_ms": 1291.67,
+   "bbox_source_xyxy_px": [
+    257.8,
+    698.9,
+    323.9,
+    844.2
+   ],
+   "crop_window_source_xyxy_px": [
+    137.95,
+    605.59,
+    445.98,
+    913.62
+   ]
+  },
+  {
+   "frame_index": 32,
+   "source_frame_index": 32,
+   "timestamp_ms": 1333.33,
+   "bbox_source_xyxy_px": [
+    257.9,
+    696.3,
+    332.7,
+    842.7
+   ],
+   "crop_window_source_xyxy_px": [
+    138.91,
+    610.28,
+    446.94,
+    918.31
+   ]
+  },
+  {
+   "frame_index": 33,
+   "source_frame_index": 33,
+   "timestamp_ms": 1375.0,
+   "bbox_source_xyxy_px": [
+    257.4,
+    698.4,
+    331.7,
+    842.5
+   ],
+   "crop_window_source_xyxy_px": [
+    139.57,
+    611.1,
+    447.6,
+    919.13
+   ]
+  },
+  {
+   "frame_index": 34,
+   "source_frame_index": 34,
+   "timestamp_ms": 1416.67,
+   "bbox_source_xyxy_px": [
+    254.3,
+    693.7,
+    334.2,
+    843.2
+   ],
+   "crop_window_source_xyxy_px": [
+    139.33,
+    603.01,
+    447.36,
+    911.04
+   ]
+  },
+  {
+   "frame_index": 35,
+   "source_frame_index": 35,
+   "timestamp_ms": 1458.33,
+   "bbox_source_xyxy_px": [
+    251.8,
+    651.8,
+    334.3,
+    839.5
+   ],
+   "crop_window_source_xyxy_px": [
+    137.94,
+    595.42,
+    445.97,
+    903.45
+   ]
+  },
+  {
+   "frame_index": 36,
+   "source_frame_index": 36,
+   "timestamp_ms": 1500.0,
+   "bbox_source_xyxy_px": [
+    250.7,
+    643.8,
+    328.6,
+    818.5
+   ],
+   "crop_window_source_xyxy_px": [
+    136.69,
+    587.64,
+    444.72,
+    895.67
+   ]
+  },
+  {
+   "frame_index": 37,
+   "source_frame_index": 37,
+   "timestamp_ms": 1541.67,
+   "bbox_source_xyxy_px": [
+    248.4,
+    643.8,
+    328.3,
+    819.2
+   ],
+   "crop_window_source_xyxy_px": [
+    135.51,
+    580.24,
+    443.54,
+    888.27
+   ]
+  }
+ ]
+}

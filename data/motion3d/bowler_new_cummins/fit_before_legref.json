@@ -1,0 +1,146 @@
+{
+ "frames_out": 100,
+ "detections_dropped_outside_camera_frame": 422,
+ "frames_without_visible_feet": 74,
+ "source_frames": [
+  0.0,
+  63.0
+ ],
+ "lr_swaps_fixed": 23,
+ "px_per_metre_mediapipe": 391.7,
+ "body_height_px": 549.1,
+ "bone_lengths_px": {
+  "ear_width": 23.9,
+  "eye_ear": 29.1,
+  "eye_width": 7.4,
+  "foot": 74.7,
+  "forearm": 89.3,
+  "heel": 15.8,
+  "hip_width": 66.2,
+  "neck_nose": 90.6,
+  "nose_ear": 36.5,
+  "nose_eye": 12.8,
+  "shin": 131.8,
+  "shoulder_width": 99.2,
+  "sole": 59.7,
+  "thigh": 149.8,
+  "torso_side": 187.3,
+  "upper_arm": 112.8
+ },
+ "max_bone_length_error_px": 0.53,
+ "contact_frames_per_foot_point": {
+  "right_ankle": 10,
+  "right_heel": 10,
+  "right_toe": 10,
+  "left_ankle": 0,
+  "left_heel": 0,
+  "left_toe": 3
+ },
+ "ground_reference_steps": [
+  [
+   2.0,
+   611.7
+  ],
+  [
+   2.0,
+   614.0
+  ],
+  [
+   2.0,
+   618.7
+  ],
+  [
+   11.5,
+   618.5
+  ],
+  [
+   11.5,
+   622.6
+  ],
+  [
+   11.5,
+   628.6
+  ],
+  [
+   14.5,
+   614.9
+  ],
+  [
+   14.5,
+   621.3
+  ],
+  [
+   14.5,
+   624.7
+  ]
+ ],
+ "planted_runs": 10,
+ "max_planted_foot_drift_px": 0.17,
+ "max_below_ground_px_seen_feet": 0.03,
+ "energy_pass1": {
+  "detections": 15725.9,
+  "depth": 527.7,
+  "bones": 48.3,
+  "proportions": 1.1,
+  "smooth": 1918.1,
+  "unseen_legs": 907.2,
+  "unseen_leg_anatomy": 113.5,
+  "bowling_arm": 3.3
+ },
+ "energy_pass2": {
+  "detections": 13814.6,
+  "depth": 507.7,
+  "bones": 26.4,
+  "proportions": 0.1,
+  "smooth": 1582.6,
+  "unseen_legs": 434.0,
+  "unseen_leg_anatomy": 24.9,
+  "speed_cap": 0.4,
+  "ground": 0.0,
+  "contact_still": 1.2,
+  "bowling_arm": 1.9
+ },
+ "jerk_raw_vs_fit": {
+  "raw_median": 11.62,
+  "fit_median": 1.73,
+  "raw_p99": 318.4,
+  "fit_p99": 10.1
+ },
+ "max_speed_ratio_raw_vs_fit": {
+  "raw_max_over_median": 26.8,
+  "fit_max_over_median": 5.5
+ },
+ "frames_with_detections": {
+  "nose": 51,
+  "right_eye": 51,
+  "left_eye": 51,
+  "right_ear": 50,
+  "left_ear": 49,
+  "right_shoulder": 52,
+  "right_elbow": 30,
+  "right_wrist": 52,
+  "left_shoulder": 49,
+  "left_elbow": 51,
+  "left_wrist": 52,
+  "right_hip": 51,
+  "right_knee": 50,
+  "right_ankle": 2,
+  "left_hip": 52,
+  "left_knee": 52,
+  "left_ankle": 9,
+  "right_heel": 1,
+  "right_toe": 0,
+  "left_heel": 1,
+  "left_toe": 12
+ },
+ "bowling_arm": {
+  "keyframed_out_frames": [
+   34,
+   99
+  ],
+  "rotation_deg": -318.3,
+  "release_index": 71,
+  "release_source_frame": 48.8,
+  "note": "bowling arm from hand-annotated keyframes (shoulder, wrist), straight arm of the fitted length"
+ }
+}

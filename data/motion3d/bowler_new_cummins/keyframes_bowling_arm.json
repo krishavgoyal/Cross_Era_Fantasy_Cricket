@@ -1,0 +1,311 @@
+{
+ "clip": "bowler_new_cummins",
+ "coords": "source_512.mp4 pixels",
+ "method": "hand-annotated on 2x-brightened frames with a 32 px grid (motion blur defeats DWPose and MediaPipe here); accuracy about +-10 px; the elbow is not annotated (straight bowling arm)",
+ "joints": [
+  "right_shoulder",
+  "right_wrist"
+ ],
+ "frames": {
+  "34": {
+   "right_shoulder": [
+    310,
+    212
+   ],
+   "right_wrist": [
+    420,
+    195
+   ]
+  },
+  "35": {
+   "right_shoulder": [
+    325,
+    205
+   ],
+   "right_wrist": [
+    410,
+    186
+   ]
+  },
+  "36": {
+   "right_shoulder": [
+    290,
+    210
+   ],
+   "right_wrist": [
+    383,
+    180
+   ]
+  },
+  "37": {
+   "right_shoulder": [
+    287,
+    205
+   ],
+   "right_wrist": [
+    368,
+    155
+   ]
+  },
+  "38": {
+   "right_shoulder": [
+    268,
+    195
+   ],
+   "right_wrist": [
+    352,
+    148
+   ]
+  },
+  "39": {
+   "right_shoulder": [
+    263,
+    195
+   ],
+   "right_wrist": [
+    338,
+    146
+   ]
+  },
+  "40": {
+   "right_shoulder": [
+    262,
+    203
+   ],
+   "right_wrist": [
+    337,
+    150
+   ]
+  },
+  "41": {
+   "right_shoulder": [
+    258,
+    200
+   ],
+   "right_wrist": [
+    318,
+    143
+   ]
+  },
+  "42": {
+   "right_shoulder": [
+    245,
+    205
+   ],
+   "right_wrist": [
+    315,
+    148
+   ]
+  },
+  "43": {
+   "right_shoulder": [
+    248,
+    210
+   ],
+   "right_wrist": [
+    303,
+    148
+   ]
+  },
+  "44": {
+   "right_shoulder": [
+    235,
+    223
+   ],
+   "right_wrist": [
+    275,
+    150
+   ]
+  },
+  "45": {
+   "right_shoulder": [
+    233,
+    215
+   ],
+   "right_wrist": [
+    283,
+    150
+   ]
+  },
+  "46": {
+   "right_shoulder": [
+    232,
+    225
+   ],
+   "right_wrist": [
+    262,
+    148
+   ]
+  },
+  "47": {
+   "right_shoulder": [
+    225,
+    230
+   ],
+   "right_wrist": [
+    228,
+    140
+   ]
+  },
+  "48": {
+   "right_shoulder": [
+    215,
+    222
+   ],
+   "right_wrist": [
+    208,
+    138
+   ]
+  },
+  "49": {
+   "right_shoulder": [
+    213,
+    225
+   ],
+   "right_wrist": [
+    188,
+    145
+   ]
+  },
+  "50": {
+   "right_shoulder": [
+    195,
+    192
+   ],
+   "right_wrist": [
+    168,
+    88
+   ]
+  },
+  "51": {
+   "right_shoulder": [
+    178,
+    170
+   ],
+   "right_wrist": [
+    128,
+    50
+   ]
+  },
+  "52": {
+   "right_shoulder": [
+    162,
+    152
+   ],
+   "right_wrist": [
+    58,
+    48
+   ]
+  },
+  "53": {
+   "right_shoulder": [
+    140,
+    145
+   ],
+   "right_wrist": [
+    30,
+    90
+   ]
+  },
+  "54": {
+   "right_shoulder": [
+    140,
+    140
+   ],
+   "right_wrist": [
+    20,
+    115
+   ]
+  },
+  "55": {
+   "right_shoulder": [
+    128,
+    140
+   ],
+   "right_wrist": [
+    8,
+    135
+   ]
+  },
+  "56": {
+   "right_shoulder": [
+    120,
+    135
+   ],
+   "right_wrist": [
+    5,
+    125
+   ]
+  },
+  "57": {
+   "right_shoulder": [
+    113,
+    150
+   ],
+   "right_wrist": [
+    5,
+    180
+   ]
+  },
+  "58": {
+   "right_shoulder": [
+    135,
+    250
+   ],
+   "right_wrist": [
+    10,
+    290
+   ]
+  },
+  "59": {
+   "right_shoulder": [
+    138,
+    250
+   ],
+   "right_wrist": [
+    3,
+    330
+   ]
+  },
+  "60": {
+   "right_shoulder": [
+    120,
+    238
+   ],
+   "right_wrist": [
+    10,
+    360
+   ]
+  },
+  "61": {
+   "right_shoulder": [
+    93,
+    258
+   ],
+   "right_wrist": [
+    25,
+    370
+   ]
+  },
+  "62": {
+   "right_shoulder": [
+    100,
+    265
+   ],
+   "right_wrist": [
+    15,
+    432
+   ]
+  },
+  "63": {
+   "right_shoulder": [
+    103,
+    290
+   ],
+   "right_wrist": [
+    28,
+    440
+   ]
+  }
+ }
+}

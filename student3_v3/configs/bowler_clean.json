@@ -1,0 +1,197 @@
+{
+ "name": "bowler_clean_v3",
+ "role": "bowler",
+ "keyframes": 16,
+ "student2_preset": "ahaan-main",
+ "hold_threshold": 2.5,
+ "frame_layout": {
+  "lead": 3,
+  "tail": 7
+ },
+ "saturation": 1.0,
+ "mask_feather_sigma": 1.2,
+ "chroma_taper_luma": 40.0,
+ "temporal_strength": 0.35,
+ "temporal_min_player_confidence": 0.35,
+ "flow_consistency_threshold": 1.5,
+ "scene_cut_threshold": 0.55,
+ "era_outputs": [
+  "newsreel_1930s",
+  "remaster",
+  "broadcast_1970s"
+ ],
+ "era_presets": {
+  "newsreel_1930s": {
+   "fps": 18,
+   "retime_jitter": 0.0,
+   "sepia": true,
+   "sepia_bgr": [
+    0.93,
+    0.98,
+    1.04
+   ],
+   "contrast": 1.12,
+   "contrast_gamma": 1.15,
+   "lens_blur_sigma": 0.05,
+   "vignette": 0.5,
+   "flicker": 0.015,
+   "gate_weave_px": 0.0,
+   "grain": 0.015,
+   "dust_per_frame": 0.0,
+   "scratch_start_prob": 0.0,
+   "max_white": 0.94,
+   "black_lift": 0.04
+  },
+  "broadcast_1970s": {
+   "fps": 25,
+   "saturation": 0.62,
+   "cast_bgr": [
+    0.94,
+    1.0,
+    1.06
+   ],
+   "chromatic_shift_px": 0,
+   "bloom": 0.15,
+   "softness_sigma": 0.05,
+   "scanline_depth": 0.08,
+   "tape_noise_prob": 0.0,
+   "noise": 1.0
+  },
+  "remaster": {
+   "fps": 24,
+   "grain": 0.5
+  }
+ },
+ "class_parts": {
+  "shirt": [
+   1,
+   2,
+   15,
+   16,
+   17,
+   18,
+   19,
+   20,
+   21,
+   22
+  ],
+  "skin": [
+   3,
+   4
+  ],
+  "trousers": [
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14
+  ],
+  "shoes": [
+   5,
+   6
+  ]
+ },
+ "head_split": {
+  "top_fraction": 0.45,
+  "top_class": "hair",
+  "face_class": "skin",
+  "back_of_head_class": "hair",
+  "face_visible": false
+ },
+ "class_order": [
+  "trousers",
+  "shirt",
+  "shoes",
+  "skin",
+  "hair"
+ ],
+ "base_player_class": "shirt",
+ "base_player_strength": 0.6,
+ "silhouette_fill_class": null,
+ "bat_from_student2": false,
+ "class_strength": {
+  "shirt": 0.9,
+  "trousers": 0.9,
+  "shoes": 0.6,
+  "skin": 0.85,
+  "hair": 0.8
+ },
+ "palette": {
+  "neutral": [
+   128,
+   128
+  ],
+  "shirt": [
+   127,
+   138
+  ],
+  "trousers": [
+   127,
+   140
+  ],
+  "skin": [
+   141,
+   153
+  ],
+  "hair": [
+   134,
+   137
+  ],
+  "shoes": [
+   128,
+   133
+  ],
+  "grass": [
+   103,
+   157
+  ],
+  "sky": [
+   124,
+   116
+  ]
+ },
+ "background": {
+  "horizon": -0.2,
+  "ramp": 0.2,
+  "grass_strength": 0.75,
+  "sky_strength": 0.0,
+  "grass_max_luma": 200
+ },
+ "overlay_colours_bgr": {
+  "shirt": [
+   255,
+   200,
+   60
+  ],
+  "trousers": [
+   60,
+   200,
+   255
+  ],
+  "shoes": [
+   200,
+   60,
+   255
+  ],
+  "skin": [
+   80,
+   140,
+   255
+  ],
+  "hair": [
+   40,
+   40,
+   160
+  ]
+ },
+ "notes": [
+  "Bowler filmed from behind (bowler_delivery_001): head pixels default to hair; set head_split.face_visible true for front-on clips.",
+  "Sleeves assumed down (forearms = shirt). Move parts 19-22 to skin for rolled sleeves.",
+  "Generated bowler background is Student 2's blurred turf plate, so the whole background is treated as grass (horizon -0.2).",
+  "Palette values come from reference colours: cream flannel RGB(238,231,212), skin RGB(200,152,118), dark-brown hair, white boots (common for 1930s fast bowlers), turf RGB(86,124,62)."
+ ],
+ "description_clean": "Copy of bowler_1930s.json for generation_v2 --clean runs: era styles keep the 1930s look (sepia, contrast, light grain) but drop lens blur, softness, dust, scratches and gate weave, so the player stays sharp."
+}

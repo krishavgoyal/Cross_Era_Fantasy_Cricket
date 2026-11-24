@@ -1,0 +1,95 @@
+{
+ "photo": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/data/reference_players/don_bradman/bradman_original_repo.jpg",
+ "crop_box": null,
+ "segmentation": "u2net_human_seg",
+ "background": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/data/backgrounds/scg_1930s_pd.jpg",
+ "bg_centre": [
+  0.35,
+  0.75
+ ],
+ "grey": true,
+ "canvas": [
+  512,
+  672
+ ],
+ "player_box_px": [
+  135,
+  94,
+  377,
+  631
+ ],
+ "ref_body_px": {
+  "nose": [
+   171.1,
+   148.4
+  ],
+  "neck": [
+   222.9,
+   191.3
+  ],
+  "right_shoulder": [
+   202.3,
+   204.1
+  ],
+  "right_elbow": [
+   233.4,
+   281.1
+  ],
+  "right_wrist": [
+   257.8,
+   351.8
+  ],
+  "left_shoulder": [
+   243.5,
+   178.5
+  ],
+  "left_elbow": [
+   267.1,
+   268.7
+  ],
+  "left_wrist": [
+   273.0,
+   347.4
+  ],
+  "right_hip": [
+   291.5,
+   309.4
+  ],
+  "right_knee": [
+   271.3,
+   449.1
+  ],
+  "right_ankle": [
+   277.2,
+   586.2
+  ],
+  "left_hip": [
+   326.1,
+   299.6
+  ],
+  "left_knee": [
+   299.1,
+   449.1
+  ],
+  "left_ankle": [
+   304.2,
+   598.6
+  ],
+  "right_eye": [
+   161.0,
+   140.4
+  ],
+  "left_eye": [
+   178.7,
+   133.3
+  ],
+  "right_ear": [
+   160.1,
+   148.4
+  ],
+  "left_ear": [
+   205.6,
+   129.8
+  ]
+ }
+}

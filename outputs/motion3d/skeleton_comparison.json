@@ -1,0 +1,54 @@
+{
+ "batting": {
+  "before": {
+   "job": "bradman_batting",
+   "frames": 139,
+   "bone_cv": 0.11,
+   "bone_jump_p99": 0.133,
+   "jerk_p99_px": 1.7,
+   "speed_spike": 8.0,
+   "missing_joint_frames": 55,
+   "bat_frames": 139,
+   "bat_len_change_p99": 0.528,
+   "bat_len_range_px": [
+    25.8,
+    318.9
+   ]
+  },
+  "now": {
+   "job": "bradman_batting_3d",
+   "frames": 139,
+   "bone_cv": 0.188,
+   "bone_jump_p99": 0.087,
+   "jerk_p99_px": 2.8,
+   "speed_spike": 13.6,
+   "missing_joint_frames": 0,
+   "bat_frames": 139,
+   "bat_len_change_p99": 0.001,
+   "bat_len_range_px": [
+    243.0,
+    246.1
+   ]
+  }
+ },
+ "bowling": {
+  "before": {
+   "job": "mcgrath_bowling",
+   "frames": 77,
+   "bone_cv": 0.145,
+   "bone_jump_p99": 0.41,
+   "jerk_p99_px": 41.5,
+   "speed_spike": 11.2,
+   "missing_joint_frames": 0
+  },
+  "now": {
+   "job": "mcgrath_bowling_3d",
+   "frames": 100,
+   "bone_cv": 0.165,
+   "bone_jump_p99": 0.158,
+   "jerk_p99_px": 5.5,
+   "speed_spike": 5.3,
+   "missing_joint_frames": 0
+  }
+ }
+}

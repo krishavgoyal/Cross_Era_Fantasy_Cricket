@@ -39,6 +39,11 @@ python master_pipeline.py --reference-video data/raw/pull_shot.mp4 --clip-id pul
     --densepose-python ~/dp/bin/python
 ```
 
+`--generated <video>` skips generation and uses a video Student 2 already made (no GPU needed); the
+frame mapping then comes from Student 3 v3's detected holds, and held frames are dropped before retiming.
+`--force all` redoes generation onwards (motion and DensePose only when `--reference-video` is given).
+See `RUN_ON_GPU.md` for the laptop setup and `COLAB.md` for running on Colab.
+
 `--python` picks the interpreter for generation/colour if the diffusers env is separate.
 
 Exit codes (same as Student 1's CLI): 0 ok, 2 arguments, 3 missing dependency, 4 bad input,

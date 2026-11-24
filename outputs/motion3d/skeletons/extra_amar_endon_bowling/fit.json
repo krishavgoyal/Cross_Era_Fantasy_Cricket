@@ -1,0 +1,140 @@
+{
+ "frames_out": 38,
+ "detections_dropped_outside_camera_frame": 0,
+ "frames_without_visible_feet": 0,
+ "source_frames": [
+  0.0,
+  37.0
+ ],
+ "lr_swaps_fixed": 0,
+ "px_per_metre_mediapipe": 130.8,
+ "body_height_px": 246.5,
+ "bone_lengths_px": {
+  "ear_width": 16.9,
+  "eye_ear": 14.8,
+  "eye_width": 11.1,
+  "foot": 64.5,
+  "forearm": 36.8,
+  "heel": 86.1,
+  "hip_width": 55.8,
+  "neck_nose": 41.4,
+  "nose_ear": 27.7,
+  "nose_eye": 13.5,
+  "shin": 48.7,
+  "shoulder_width": 37.8,
+  "sole": 25.9,
+  "thigh": 47.5,
+  "torso_side": 60.8,
+  "upper_arm": 42.0
+ },
+ "max_bone_length_error_px": 0.12,
+ "contact_frames_per_foot_point": {
+  "right_ankle": 0,
+  "right_heel": 17,
+  "right_toe": 9,
+  "left_ankle": 0,
+  "left_heel": 21,
+  "left_toe": 5
+ },
+ "ground_reference_steps": [
+  [
+   1.5,
+   933.4
+  ],
+  [
+   6.0,
+   932.7
+  ],
+  [
+   10.0,
+   923.2
+  ],
+  [
+   12.5,
+   919.4
+  ],
+  [
+   14.5,
+   915.7
+  ],
+  [
+   15.5,
+   920.0
+  ],
+  [
+   17.5,
+   925.8
+  ],
+  [
+   23.5,
+   915.9
+  ],
+  [
+   24.5,
+   917.6
+  ],
+  [
+   29.0,
+   918.8
+  ],
+  [
+   30.5,
+   912.8
+  ]
+ ],
+ "planted_runs": 11,
+ "max_planted_foot_drift_px": 0.08,
+ "max_below_ground_px_seen_feet": 0.02,
+ "energy_pass1": {
+  "detections": 13630.8,
+  "depth": 46.3,
+  "bones": 3.5,
+  "smooth": 298.9,
+  "unseen_legs": 6.7,
+  "unseen_leg_anatomy": 1.5
+ },
+ "energy_pass2": {
+  "detections": 13640.0,
+  "depth": 52.6,
+  "bones": 4.4,
+  "smooth": 296.5,
+  "unseen_legs": 10.2,
+  "unseen_leg_anatomy": 2.2,
+  "speed_cap": 0.0,
+  "ground": 0.0,
+  "contact_still": 0.2
+ },
+ "jerk_raw_vs_fit": {
+  "raw_median": 5.38,
+  "fit_median": 1.42,
+  "raw_p99": 177.1,
+  "fit_p99": 14.5
+ },
+ "max_speed_ratio_raw_vs_fit": {
+  "raw_max_over_median": 22.7,
+  "fit_max_over_median": 4.8
+ },
+ "frames_with_detections": {
+  "nose": 38,
+  "right_eye": 38,
+  "left_eye": 38,
+  "right_ear": 38,
+  "left_ear": 38,
+  "right_shoulder": 38,
+  "right_elbow": 38,
+  "right_wrist": 31,
+  "left_shoulder": 38,
+  "left_elbow": 38,
+  "left_wrist": 35,
+  "right_hip": 38,
+  "right_knee": 38,
+  "right_ankle": 38,
+  "left_hip": 38,
+  "left_knee": 38,
+  "left_ankle": 38,
+  "right_heel": 38,
+  "right_toe": 0,
+  "left_heel": 38,
+  "left_toe": 31
+ }
+}

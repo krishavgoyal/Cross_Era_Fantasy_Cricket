@@ -1,0 +1,39 @@
+{
+ "generated": "outputs/animate_v2/mcgrath_bowling.mp4",
+ "target": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/animate/jobs/mcgrath_bowling/target_pose.json",
+ "frames": 28,
+ "pck@0.05": 0.8285,
+ "pck@0.1": 0.8781,
+ "pck@0.2": 0.9153,
+ "per_joint_pck@0.1": {
+  "nose": 1.0,
+  "neck": 1.0,
+  "right_shoulder": 1.0,
+  "right_elbow": 0.357,
+  "right_wrist": 0.357,
+  "left_shoulder": 1.0,
+  "left_elbow": 1.0,
+  "left_wrist": 0.786,
+  "right_hip": 1.0,
+  "right_knee": 1.0,
+  "right_ankle": 0.0,
+  "left_hip": 1.0,
+  "left_knee": 1.0,
+  "left_ankle": 1.0,
+  "right_eye": 1.0,
+  "left_eye": 1.0,
+  "right_ear": 1.0,
+  "left_ear": 1.0
+ },
+ "complete_body_frames": 0.6071,
+ "face_detected_frames": 1.0,
+ "merged_limb_frames": 0.0357,
+ "merged_limb_frame_list": [
+  27
+ ],
+ "player_found_frames": 1.0,
+ "silhouette_iou_mean": 0.7835,
+ "silhouette_iou_min": 0.5933,
+ "silhouette_drops_below_0.7": 6,
+ "area_change_max": 0.1156
+}

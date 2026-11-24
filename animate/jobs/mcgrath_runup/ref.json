@@ -1,0 +1,100 @@
+{
+ "photo": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/data/reference_players/glenn_mcgrath/mcgrath_delivery_stride_sportingheroes.jpg",
+ "crop_box": [
+  0.0,
+  0.13,
+  1.0,
+  1.0
+ ],
+ "segmentation": "isnet-general-use",
+ "background": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/data/backgrounds/lords_pavilion_2017.jpg",
+ "bg_centre": [
+  0.15,
+  0.55
+ ],
+ "grey": false,
+ "canvas": [
+  512,
+  672
+ ],
+ "player_box_px": [
+  36,
+  94,
+  476,
+  631
+ ],
+ "ref_body_px": {
+  "nose": [
+   229.9,
+   138.8
+  ],
+  "neck": [
+   205.9,
+   199.2
+  ],
+  "right_shoulder": [
+   156.1,
+   210.3
+  ],
+  "right_elbow": [
+   114.9,
+   286.8
+  ],
+  "right_wrist": [
+   79.4,
+   361.2
+  ],
+  "left_shoulder": [
+   255.7,
+   188.1
+  ],
+  "left_elbow": [
+   343.9,
+   184.1
+  ],
+  "left_wrist": [
+   398.5,
+   131.8
+  ],
+  "right_hip": [
+   192.5,
+   351.2
+  ],
+  "right_knee": [
+   188.7,
+   481.0
+  ],
+  "right_ankle": [
+   103.4,
+   580.6
+  ],
+  "left_hip": [
+   250.0,
+   351.2
+  ],
+  "left_knee": [
+   320.9,
+   440.7
+  ],
+  "left_ankle": [
+   412.0,
+   549.4
+  ],
+  "right_eye": [
+   220.3,
+   129.8
+  ],
+  "left_eye": [
+   227.9,
+   131.8
+  ],
+  "right_ear": [
+   192.5,
+   138.8
+  ],
+  "left_ear": [
+   212.6,
+   140.8
+  ]
+ }
+}

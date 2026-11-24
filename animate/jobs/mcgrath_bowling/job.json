@@ -1,0 +1,226 @@
+{
+ "name": "mcgrath_bowling",
+ "kind": "bowling",
+ "clip": "bowler_new_cummins",
+ "photo": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/data/reference_players/glenn_mcgrath/mcgrath_delivery_stride_sportingheroes.jpg",
+ "n_frames": 77,
+ "motion_cleaning": {
+  "lr_swaps_fixed": 0,
+  "limb_joints_filled_by_angle": 48,
+  "joints_filled": 54,
+  "bones_clamped": 282,
+  "hands_dropped": 56,
+  "delivery": {
+   "window_source_frames": [
+    30,
+    46
+   ],
+   "stretch": 2.5,
+   "frames_out": 41,
+   "bowling_arm": "right",
+   "arm_lengths_px": [
+    69.5,
+    52.6
+   ],
+   "arm_rotation_deg": -376.1,
+   "release_index": 53,
+   "hand_template_frames": 15,
+   "note": "reconstructed delivery: straight bowling arm, eased rotation, measured hand shape carried along"
+  },
+  "ball": {
+   "bowling_arm": "right",
+   "release_index": 53,
+   "release_velocity_px_per_frame": [
+    -37.1,
+    6.6
+   ]
+  },
+  "frames_dropped_outside_canvas": 0,
+  "kept_source_frames": [
+   0.0,
+   52.0
+  ],
+  "frames_partly_outside_canvas": 0
+ },
+ "scene": {
+  "kind": "bowling",
+  "zoom": 0.785,
+  "offset": [
+   46,
+   140
+  ],
+  "clip": "bowler_new_cummins",
+  "canvas": [
+   560,
+   632
+  ],
+  "photo_crop_top": 0.135,
+  "camera_pan_x_first_last": [
+   0.0,
+   -377.9
+  ],
+  "aligned_frame": 33,
+  "align_error_px": 103.6,
+  "torso_ratio": 0.9563,
+  "bone_ratios_vs_torso": {
+   "right_shoulder->right_elbow": 0.928,
+   "right_elbow->right_wrist": 1.12,
+   "right_hip->right_knee": 1.072,
+   "right_knee->right_ankle": 1.25
+  },
+  "fps": 24.0,
+  "source_frames": [
+   0.0,
+   1.0,
+   2.0,
+   3.0,
+   4.0,
+   5.0,
+   6.0,
+   7.0,
+   8.0,
+   9.0,
+   10.0,
+   11.0,
+   12.0,
+   13.0,
+   14.0,
+   15.0,
+   16.0,
+   17.0,
+   18.0,
+   19.0,
+   20.0,
+   21.0,
+   22.0,
+   23.0,
+   24.0,
+   25.0,
+   26.0,
+   27.0,
+   28.0,
+   29.0,
+   30.0,
+   30.4,
+   30.8,
+   31.2,
+   31.6,
+   32.0,
+   32.4,
+   32.8,
+   33.2,
+   33.6,
+   34.0,
+   34.4,
+   34.8,
+   35.2,
+   35.6,
+   36.0,
+   36.4,
+   36.8,
+   37.2,
+   37.6,
+   38.0,
+   38.4,
+   38.8,
+   39.2,
+   39.6,
+   40.0,
+   40.4,
+   40.8,
+   41.2,
+   41.6,
+   42.0,
+   42.4,
+   42.8,
+   43.2,
+   43.6,
+   44.0,
+   44.4,
+   44.8,
+   45.2,
+   45.6,
+   46.0,
+   47.0,
+   48.0,
+   49.0,
+   50.0,
+   51.0,
+   52.0
+  ],
+  "ref_body_px": {
+   "nose": [
+    259.2,
+    47.0
+   ],
+   "neck": [
+    233.5,
+    111.8
+   ],
+   "right_shoulder": [
+    176.2,
+    123.9
+   ],
+   "right_elbow": [
+    130.0,
+    210.3
+   ],
+   "right_wrist": [
+    91.2,
+    293.6
+   ],
+   "left_shoulder": [
+    290.7,
+    99.7
+   ],
+   "left_elbow": [
+    384.2,
+    99.7
+   ],
+   "left_wrist": [
+    443.1,
+    40.6
+   ],
+   "right_hip": [
+    218.3,
+    280.9
+   ],
+   "right_knee": [
+    212.0,
+    426.3
+   ],
+   "right_ankle": [
+    115.3,
+    537.0
+   ],
+   "left_hip": [
+    282.3,
+    279.9
+   ],
+   "left_knee": [
+    355.9,
+    378.9
+   ],
+   "left_ankle": [
+    459.9,
+    498.0
+   ],
+   "right_eye": [
+    248.7,
+    37.5
+   ],
+   "left_eye": [
+    258.2,
+    39.6
+   ],
+   "right_ear": [
+    218.3,
+    45.9
+   ],
+   "left_ear": [
+    235.1,
+    49.1
+   ]
+  }
+ }
+}

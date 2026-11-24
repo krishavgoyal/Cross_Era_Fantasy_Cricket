@@ -1,0 +1,14 @@
+{
+ "frames": 100,
+ "hands": {
+  "left": {
+   "frames_with_good_detection": 37,
+   "frames_total": 100
+  },
+  "right": {
+   "frames_with_good_detection": 9,
+   "frames_total": 100
+  }
+ },
+ "bat_frames": 0
+}

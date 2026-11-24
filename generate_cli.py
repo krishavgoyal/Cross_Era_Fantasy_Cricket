@@ -25,6 +25,13 @@ def build_parser():
     p.add_argument("--ref-box", type=float, nargs=4, default=None, metavar=("X1", "Y1", "X2", "Y2"),
                    help="bowler only: normalized box of the player in --image (default fits modern_bowler.jpeg)")
     p.add_argument("--report", default="", help="also write the run report json here (e.g. m3_vram_report.json)")
+    p.add_argument("--engine", choices=["v1", "v2"], default="v1",
+                   help="v1 = Milestone3Engine; v2 = generation_v2.SkeletonGuidedEngine (adds skeleton ControlNet + view direction)")
+    p.add_argument("--pose-json", default=None, help="v2: Student 1 pose_data.json (default: next to --metadata)")
+    p.add_argument("--pose-scale", type=float, default=0.8, help="v2: skeleton ControlNet weight")
+    p.add_argument("--view", choices=["auto", "back", "front", "side"], default="auto", help="v2: camera view of the player")
+    p.add_argument("--clean", action="store_true",
+                   help="v2: plain backdrop, crisp outline, no colour-guessed brightening; >16 frames use FreeNoise windows")
     return p
 
 
@@ -50,11 +57,20 @@ def main(argv=None):
 
     try:
         from generation_engine import Milestone3Engine
+        if args.engine == "v2":
+            from generation_v2 import SkeletonGuidedEngine
     except ModuleNotFoundError as e:
         print(f"ERROR [3]: missing dependency: {e}", file=sys.stderr)
         return 3
 
-    engine = Milestone3Engine()
+    if args.engine == "v2":
+        pose_json = Path(args.pose_json) if args.pose_json else Path(args.metadata).parent / "pose_data.json"
+        if not pose_json.exists():
+            print(f"ERROR [4]: input does not exist: {pose_json}", file=sys.stderr)
+            return 4
+        engine = SkeletonGuidedEngine(pose_json, pose_scale=args.pose_scale, view=args.view, clean=args.clean)
+    else:
+        engine = Milestone3Engine()
     if args.ref_box:
         engine.bowler_ref_box = tuple(args.ref_box)
     try:
@@ -77,6 +93,8 @@ def main(argv=None):
         print(f"ERROR [4]: {e}", file=sys.stderr)
         return 4
     except Exception as e:  # model download / CUDA OOM / diffusers errors
+        import traceback
+        traceback.print_exc()
         print(f"ERROR [5]: generation failed: {e}", file=sys.stderr)
         return 5
 

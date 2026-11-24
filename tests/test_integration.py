@@ -118,3 +118,19 @@ def test_student3_v3_uses_sidecar_geometry():
     g, agree = geometry_from_sidecar(g, side)
     assert g.sampled_source_indices[0] == 60 and g.crop_xyxy_source == (50, 0, 434, 512)
     assert agree["used"] and not agree["rederived_frames_match"]
+
+
+def test_force_all_keeps_processed_clip(tmp_path):
+    a = mp.build_parser().parse_args(["--clip-id", "x", "--image", "i.jpg", "--force", "all"])
+    assert "motion" not in mp.Pipeline(a).force and "generate" in mp.Pipeline(a).force
+
+
+def test_keyframe_video_drops_holds(tmp_path):
+    import cv2
+    src = tmp_path / "in.mp4"
+    w = cv2.VideoWriter(str(src), cv2.VideoWriter_fourcc(*"mp4v"), 7, (64, 64))
+    layout = [0, 0, 0] + list(range(4)) + [3, 3]
+    for k in layout:
+        w.write(np.full((64, 64, 3), 40 * (k + 1), np.uint8))
+    w.release()
+    assert mp.keyframe_video(src, tmp_path / "out.mp4", layout) == 4

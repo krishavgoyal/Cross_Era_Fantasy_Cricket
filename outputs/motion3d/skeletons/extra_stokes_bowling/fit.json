@@ -1,0 +1,108 @@
+{
+ "frames_out": 36,
+ "detections_dropped_outside_camera_frame": 0,
+ "frames_without_visible_feet": 0,
+ "source_frames": [
+  0.0,
+  35.0
+ ],
+ "lr_swaps_fixed": 2,
+ "px_per_metre_mediapipe": 227.1,
+ "body_height_px": 259.0,
+ "bone_lengths_px": {
+  "ear_width": 20.5,
+  "eye_ear": 15.3,
+  "eye_width": 6.3,
+  "foot": 41.9,
+  "forearm": 57.1,
+  "heel": 28.4,
+  "hip_width": 27.3,
+  "neck_nose": 61.9,
+  "nose_ear": 21.3,
+  "nose_eye": 8.0,
+  "shin": 111.8,
+  "shoulder_width": 45.6,
+  "sole": 16.4,
+  "thigh": 74.1,
+  "torso_side": 85.3,
+  "upper_arm": 43.8
+ },
+ "max_bone_length_error_px": 0.17,
+ "contact_frames_per_foot_point": {
+  "right_ankle": 0,
+  "right_heel": 3,
+  "right_toe": 3,
+  "left_ankle": 0,
+  "left_heel": 0,
+  "left_toe": 3
+ },
+ "ground_reference_steps": [
+  [
+   20.5,
+   517.5
+  ],
+  [
+   31.5,
+   515.2
+  ],
+  [
+   31.5,
+   521.0
+  ]
+ ],
+ "planted_runs": 3,
+ "max_planted_foot_drift_px": 0.02,
+ "max_below_ground_px_seen_feet": 0.02,
+ "energy_pass1": {
+  "detections": 15884.6,
+  "depth": 181.4,
+  "bones": 9.1,
+  "smooth": 843.7,
+  "unseen_legs": 9.8,
+  "unseen_leg_anatomy": 3.6
+ },
+ "energy_pass2": {
+  "detections": 15843.0,
+  "depth": 251.3,
+  "bones": 8.1,
+  "smooth": 840.5,
+  "unseen_legs": 8.6,
+  "unseen_leg_anatomy": 2.9,
+  "speed_cap": 0.0,
+  "ground": 0.0,
+  "contact_still": 0.0
+ },
+ "jerk_raw_vs_fit": {
+  "raw_median": 23.82,
+  "fit_median": 3.43,
+  "raw_p99": 155.8,
+  "fit_p99": 10.9
+ },
+ "max_speed_ratio_raw_vs_fit": {
+  "raw_max_over_median": 8.4,
+  "fit_max_over_median": 3.0
+ },
+ "frames_with_detections": {
+  "nose": 36,
+  "right_eye": 36,
+  "left_eye": 36,
+  "right_ear": 36,
+  "left_ear": 36,
+  "right_shoulder": 36,
+  "right_elbow": 27,
+  "right_wrist": 28,
+  "left_shoulder": 36,
+  "left_elbow": 35,
+  "left_wrist": 36,
+  "right_hip": 36,
+  "right_knee": 36,
+  "right_ankle": 36,
+  "left_hip": 36,
+  "left_knee": 36,
+  "left_ankle": 36,
+  "right_heel": 34,
+  "right_toe": 34,
+  "left_heel": 34,
+  "left_toe": 34
+ }
+}

@@ -1,0 +1,27 @@
+{
+ "generated": "outputs/animate/mcgrath_runup.mp4",
+ "target": "animate/jobs/mcgrath_runup/target_pose.json",
+ "frames": 81,
+ "pck@0.05": 0.9449,
+ "pck@0.1": 0.9761,
+ "pck@0.2": 0.9909,
+ "per_joint_pck@0.1": {
+  "neck": 0.988,
+  "right_shoulder": 0.988,
+  "right_elbow": 0.938,
+  "right_wrist": 0.877,
+  "left_shoulder": 1.0,
+  "left_elbow": 0.951,
+  "left_wrist": 0.963,
+  "right_hip": 1.0,
+  "right_knee": 1.0,
+  "right_ankle": 0.988,
+  "left_hip": 1.0,
+  "left_knee": 1.0,
+  "left_ankle": 0.963,
+  "right_ear": 0.988,
+  "left_ear": 1.0
+ },
+ "complete_body_frames": 0.9383,
+ "face_detected_frames": 1.0
+}

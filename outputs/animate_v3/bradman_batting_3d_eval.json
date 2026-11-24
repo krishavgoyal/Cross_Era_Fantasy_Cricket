@@ -1,0 +1,39 @@
+{
+ "generated": "outputs/animate_v3/bradman_batting_3d.mp4",
+ "target": "/mnt/c/Users/Prana/Downloads/Cross_Era_v3/Cross_Era_Fantasy_Cricket/animate/jobs/bradman_batting_3d/target_pose.json",
+ "frames": 139,
+ "pck@0.05": 0.8317,
+ "pck@0.1": 0.9628,
+ "pck@0.2": 0.998,
+ "per_joint_pck@0.1": {
+  "nose": 1.0,
+  "neck": 1.0,
+  "right_shoulder": 0.978,
+  "right_elbow": 0.791,
+  "right_wrist": 0.871,
+  "left_shoulder": 0.993,
+  "left_elbow": 0.727,
+  "left_wrist": 0.978,
+  "right_hip": 0.993,
+  "right_knee": 1.0,
+  "right_ankle": 1.0,
+  "left_hip": 1.0,
+  "left_knee": 1.0,
+  "left_ankle": 1.0,
+  "right_eye": 1.0,
+  "left_eye": 1.0,
+  "right_ear": 1.0,
+  "left_ear": 1.0
+ },
+ "complete_body_frames": 0.9784,
+ "face_detected_frames": 1.0,
+ "merged_limb_frames": 0.0072,
+ "merged_limb_frame_list": [
+  31
+ ],
+ "player_found_frames": 1.0,
+ "silhouette_iou_mean": 0.9511,
+ "silhouette_iou_min": 0.8518,
+ "silhouette_drops_below_0.7": 0,
+ "area_change_max": 0.0694
+}
