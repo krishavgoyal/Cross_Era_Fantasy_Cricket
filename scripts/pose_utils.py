@@ -117,6 +117,20 @@ def read_video(path: str | Path, start: float = 0.0, end: float | None = None) -
     return frames, float(fps)
 
 
+def find_ffmpeg(tool: str = "ffmpeg") -> str | None:
+    """Path of ffmpeg/ffprobe: PATH first, then the winget install folder (a terminal opened before
+    `winget install Gyan.FFmpeg` does not see the new PATH entry yet)."""
+    exe = shutil.which(tool)
+    if exe:
+        return exe
+    import glob
+    import os
+    pattern = os.path.join(os.environ.get("LOCALAPPDATA", ""), "Microsoft", "WinGet", "Packages", "Gyan.FFmpeg*",
+                           "*", "bin", f"{tool}.exe")
+    hits = sorted(glob.glob(pattern))
+    return hits[-1] if hits else None
+
+
 def write_video(path: str | Path, frames: list[np.ndarray], fps: float) -> Path:
     """Write BGR frames to .mp4. If ffmpeg is on PATH, re-encode to H.264 (yuv420p) for compatibility."""
     path = Path(path)
@@ -127,8 +141,9 @@ def write_video(path: str | Path, frames: list[np.ndarray], fps: float) -> Path:
     for f in frames:
         writer.write(f)
     writer.release()
-    if shutil.which("ffmpeg"):
-        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", str(tmp), "-c:v", "libx264",
+    ffmpeg = find_ffmpeg()
+    if ffmpeg:
+        subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-i", str(tmp), "-c:v", "libx264",
                         "-pix_fmt", "yuv420p", "-crf", "16", "-r", str(fps), str(path)], check=True)
         tmp.unlink()
     else:

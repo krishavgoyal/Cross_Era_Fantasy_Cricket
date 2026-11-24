@@ -111,17 +111,43 @@ Reading: motion following is already good (PCK 0.88-0.93), so the problem is app
   - The default negative now also includes "logo, black pads, black trousers".
   - Outputs: `final_cap_s42_33f.mp4`, `final_nocap_s42_33f.mp4`. Score both with `score_ablation.py` (control `data/pose/batter/depth_33.npz`) and compare face visibility by eye.
 
-## 6. Results [TODO]
+## 6. Results
 
-Paste from `results/metrics.csv` (raw vs styled, VACE vs AnimateDiff baseline):
+### 6.1 Ablation (17 frames, raw outputs, `results/ablation.csv`)
 
-| Clip | Kind | PCK@0.2 | DINO mean / min | Brightness std | Frame diff |
-|---|---|---|---|---|---|
-| bradman_vace | raw | | | | |
-| bradman_vace | 1930s_film | | | | |
-| animatediff_baseline | raw | (see TEAM_INTEGRATION.md) | | | |
+| Run | Control | Ref | Seed | PCK@0.2 | DINO vs crop (mean / min) | DINO vs orig (mean / min) | Brightness std | Frame diff | Bat (by eye) |
+|---|---|---|---|---|---|---|---|---|---|
+| A | pose | padded | 42 | 0.934 | 0.205 / 0.166 | 0.158 / 0.127 | 2.27 | 10.10 | lost |
+| B | depth | padded | 42 | 0.997 | 0.223 / 0.080 | 0.291 / 0.145 | 1.63 | 11.43 | one bat |
+| C | pose | crop | 42 | 0.969 | 0.172 / 0.116 | 0.130 / 0.074 | 2.49 | 10.62 | lost |
+| D1 | depth | crop | 42 | 0.983 | 0.206 / 0.124 | 0.207 / 0.114 | 1.98 | 10.26 | one bat |
+| D2 | depth | crop | 7 | 0.900 | 0.230 / 0.114 | 0.227 / 0.099 | 1.49 | 10.97 | one bat |
+| D3 | depth | crop | 123 | 0.979 | 0.165 / 0.101 | 0.156 / 0.092 | 2.06 | 11.90 | one bat |
+| D4 | depth | crop | 2024 | 0.990 | 0.302 / 0.169 | 0.305 / 0.172 | 1.25 | 10.40 | one bat |
 
-How to read them: PCK@0.2 = share of body joints within 20% of the torso length of where the control put them. DINO = cosine similarity of image features (1 = identical). Lower brightness std / frame diff = less flicker. Styled versions are expected to score lower on PCK/DINO because grain, blur and jitter are added on purpose.
+PCK is against each run's own control (pose runs vs the skeleton, depth runs vs the same clip's keypoints on the margin canvas), on the first 17 control frames. Lower brightness std / frame diff = less flicker.
+
+**Findings:**
+- **Depth control fixed the bat** (visual check, section 5): every depth run keeps one bat for the whole clip; both pose runs (A, C) lose it. Motion accuracy stays high for every run (PCK 0.90-1.00), so depth does not cost motion fidelity.
+- **Depth lowered brightness flicker**: mean brightness std is 2.38 for the pose runs vs 1.68 for the depth runs. Frame-to-frame difference did **not** drop (10.36 pose vs 10.99 depth): the depth runs move the bat and arms through a fuller swing, which this metric also counts as change.
+- **The tight crop did not clearly raise identity.** Same control and seed, padded -> crop: B -> D1 changes DINO vs crop by -0.017 and vs the original photo by -0.084; with the pose control (A -> C) by -0.034. The likely reason is the dark cap hiding the face in every run (section 5), so the better-framed face in the reference has little to transfer to.
+- **Seed variation is larger than the reference effect**: across D1-D4 (identical inputs, only the seed differs) DINO vs crop spans 0.137 and DINO vs orig 0.149, several times the B -> D1 change. Single-seed comparisons of likeness are therefore not conclusive; the bat result is (it held in all five depth runs and failed in both pose runs).
+- Absolute DINO values are low (0.13-0.30) because whole-body crops of a seated man in a suit are compared with a standing batter in whites; use them only to rank runs.
+
+### 6.2 Final video (real speed)
+
+- The 33-frame outputs cover 0-5.6 s of the source at 16 fps, so they play about 2.7x too fast. `scripts/retime.py` stretches them back to 5.6 s at 24 fps.
+- Methods compared on the fast swing (output frames 76-100):
+  - `hold`: crisp, but visibly steps every 0.175 s.
+  - `blend` (ffmpeg `framerate`): faint double exposures on the fastest frames, but never distorts the bat. After the 1930s filter (18 fps, blur, grain) the ghosting reads as motion blur. **Default.**
+  - `mci` (ffmpeg `minterpolate`): rejected. The thin bat handle tears/fades in the interpolated frames, and the output came out short (131 instead of 135 frames, motion about 2 frames early).
+- `scripts/make_final.py` produces `final.mp4` (2.5 s intro card + 5.67 s 1930s clip), `final_eras.mp4` (1930s / 1970s / 1990s, each after a 1.5 s card, 21.6 s) and `compare.mp4` (source | control | generated 1930s, same 5.6 s timeline).
+- Checks: no black frames; label present on every output.
+- **[TODO]** final_cap / final_nocap: add PCK / DINO / flicker from `score_ablation.py` rows F1/F2 and the visual verdict (face visible? one bat? pads white?).
+
+### 6.3 Team baseline
+
+- AnimateDiff vs VACE comparison: see `docs/TEAM_INTEGRATION.md` (identity + flicker comparable directly; PCK from Student 3's evaluator). **[TODO]** numbers.
 
 ## 7. Limitations
 

@@ -110,6 +110,30 @@ python scripts\make_sequence.py --clips data\styled\bowler_33f_1970s_tv.mp4 data
 
 All parts are letterboxed to the first clip's size and 25 fps (`--size`, `--fps` to change); title cards carry the AI-generated label.
 
+## Final video (real speed, 1930s look) - one command
+
+The 33-frame outputs cover 5.6 s of the source but play at 16 fps (~2 s, 2.7x too fast). `make_final.py` retimes
+them to the real 5.6 s at 24 fps (`retime.py`, default method `blend`), applies the era filters (duration kept,
+label burned) and builds the presentation videos:
+
+```powershell
+python scripts\make_final.py --input data\gen\v3_raw\final_cap_s42_33f.mp4 --tag _cap        # depth control is the default --control
+python scripts\make_final.py --input data\gen\v3_raw\final_nocap_s42_33f.mp4 --tag _nocap
+# run A (pose control):
+python scripts\make_final.py --input data\gen\v1_raw\bradman_batting_33f.mp4 --control data\pose\batter\control_33.mp4
+```
+
+Outputs in `data\final\`:
+- `final<tag>.mp4`: intro card + 1930s clip.
+- `final_eras<tag>.mp4`: 1930s / 1970s / 1990s, each after a title card.
+- `compare<tag>.mp4`: source | control | generated, on the same timeline.
+- `work\`: intermediates.
+
+Retime methods (`python scripts\retime.py --method hold|blend|mci`):
+- `hold`: crisp but steps every 0.175 s.
+- `blend`: faint ghosting on the fastest frames but never distorts the bat. **Default.**
+- `mci`: motion-compensated, but it tore the thin bat in the interpolated frames and came out ~4 frames short. Not used.
+
 ## Likeness + bat ablation (v2)
 
 ```powershell

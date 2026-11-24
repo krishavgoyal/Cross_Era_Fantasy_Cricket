@@ -36,6 +36,9 @@ Earlier Student 3 code lives in `C:\Users\ASUS V16\Downloads\student3_v3_bowler\
 - `kaggle/vace_generate.ipynb`: the VACE generation notebook (task 3).
 - `scripts/era_filters.py`, `scripts/eval_metrics.py`, `scripts/make_sequence.py` (tasks 4–6).
 - `docs/research/`: short Phase 0 / 0.1 summaries. Background only; do not redo the research.
+- v2/v3 additions: `prepare_ref.py` (tight ref on white), `make_depth_control.py` (Depth Anything V2 Small, aligned with `make_control.py`), `build_kaggle_inputs.py`, `score_ablation.py` (-> `results/ablation.csv`), `retime.py` (real speed, default `blend`; `mci` tears the bat), `make_final.py` (one command -> `data/final/final*.mp4`, `final_eras*.mp4`, `compare*.mp4`).
+- Ablation result: **depth control fixes the bat**; the tight crop did not clearly raise identity; seed matters more than the reference. Finals: depth + `bradman_crop.png`, seed 42, 33 frames (`final_cap`, `final_nocap`).
+- ffmpeg 9.1 is installed via winget; `pose_utils.find_ffmpeg()` also finds it when PATH is stale.
 
 ## Conventions
 - Videos, weights and `.npz` files are git-ignored. Work data goes in `data/` (ignored).

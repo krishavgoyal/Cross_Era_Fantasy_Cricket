@@ -25,7 +25,7 @@ import cv2
 import numpy as np
 
 from era_filters import burn_label
-from pose_utils import write_video
+from pose_utils import find_ffmpeg, write_video
 
 
 def probe_size(path: str) -> tuple[int, int]:
@@ -49,8 +49,8 @@ def wrap_text(text: str, max_chars: int) -> list[str]:
     return lines + ([cur] if cur else [])
 
 
-def make_card(text: str, size: tuple[int, int], seconds: float, fps: float, path: Path) -> Path:
-    """Black title card with centred, wrapped white text and the AI-generated label."""
+def make_card(text: str, size: tuple[int, int], seconds: float, fps: float, path: Path, subtitle: str | None = None) -> Path:
+    """Black title card with centred, wrapped white text, an optional smaller grey subtitle line and the AI label."""
     w, h = size
     scale = max(0.6, w / 640)
     thick = max(1, int(round(scale * 1.8)))
@@ -63,14 +63,21 @@ def make_card(text: str, size: tuple[int, int], seconds: float, fps: float, path
         (tw, _), _ = cv2.getTextSize(line, cv2.FONT_HERSHEY_SIMPLEX, scale, thick)
         cv2.putText(frame, line, ((w - tw) // 2, y0 + i * line_h), cv2.FONT_HERSHEY_SIMPLEX, scale,
                     (255, 255, 255), thick, cv2.LINE_AA)
+    if subtitle:
+        sub_scale = scale * 0.6
+        for j, line in enumerate(wrap_text(subtitle, max(8, int(0.85 * w / (cw * 0.6))))):
+            (tw, _), _ = cv2.getTextSize(line, cv2.FONT_HERSHEY_SIMPLEX, sub_scale, 1)
+            cv2.putText(frame, line, ((w - tw) // 2, y0 + len(lines) * line_h + int(scale * 20) + j * int(scale * 28)),
+                        cv2.FONT_HERSHEY_SIMPLEX, sub_scale, (190, 190, 190), 1, cv2.LINE_AA)
     frames = burn_label([frame] * max(1, int(round(seconds * fps))))
     return write_video(path, frames, fps)
 
 
 def build_sequence(clips: list[str], cards: list[str | None], intro: str | None, outro: str | None, out: Path,
-                   size: tuple[int, int], fps: float, card_seconds: float, crf: int = 18) -> Path:
+                   size: tuple[int, int], fps: float, card_seconds: float, crf: int = 18,
+                   intro_sub: str | None = None) -> Path:
     """Concatenate [intro card] + ([card] + clip)* + [outro card] into out."""
-    ffmpeg = shutil.which("ffmpeg")
+    ffmpeg = find_ffmpeg()
     if not ffmpeg:
         raise SystemExit("ffmpeg not found on PATH. Install it (winget install Gyan.FFmpeg) and open a NEW terminal.")
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -79,7 +86,7 @@ def build_sequence(clips: list[str], cards: list[str | None], intro: str | None,
         tmp = Path(tmp)
         parts: list[str] = []
         if intro:
-            parts.append(str(make_card(intro, size, card_seconds, fps, tmp / "intro.mp4")))
+            parts.append(str(make_card(intro, size, card_seconds, fps, tmp / "intro.mp4", subtitle=intro_sub)))
         for i, clip in enumerate(clips):
             if cards[i]:
                 parts.append(str(make_card(cards[i], size, card_seconds, fps, tmp / f"card_{i}.mp4")))
@@ -105,6 +112,7 @@ def main() -> int:
     ap.add_argument("--clips", nargs="+", required=True, help="clips in order, e.g. bowler then batter")
     ap.add_argument("--cards", nargs="*", default=[], help="optional card text shown before each clip (same order)")
     ap.add_argument("--intro", help="opening title card, e.g. 'Michael Holding vs Sachin Tendulkar'")
+    ap.add_argument("--intro-sub", help="smaller second line on the intro card, e.g. 'AI-generated - academic project'")
     ap.add_argument("--outro", help="closing card")
     ap.add_argument("--out", default="data/final/final.mp4")
     ap.add_argument("--size", help="WxH of the final video (default: size of the first clip)")
@@ -116,7 +124,8 @@ def main() -> int:
         raise SystemExit("More --cards than --clips")
     cards = args.cards + [None] * (len(args.clips) - len(args.cards))
     size = tuple(int(v) for v in args.size.lower().split("x")) if args.size else probe_size(args.clips[0])
-    out = build_sequence(args.clips, cards, args.intro, args.outro, Path(args.out), size, args.fps, args.card_seconds)
+    out = build_sequence(args.clips, cards, args.intro, args.outro, Path(args.out), size, args.fps, args.card_seconds,
+                         intro_sub=args.intro_sub)
     cap = cv2.VideoCapture(str(out))
     n, f = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)), cap.get(cv2.CAP_PROP_FPS)
     cap.release()
