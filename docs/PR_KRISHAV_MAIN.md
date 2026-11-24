@@ -19,15 +19,21 @@ It also covers the likeness/bat ablation, the batter final (F1 `final_cap`), the
 | Pose + controls | `scripts/extract_pose.py`, `make_control.py`, `make_depth_control.py` (Depth Anything V2 Small, `--soften-head`, `--target-only`), `pose_utils.py` |
 | Reference photos | `scripts/prepare_ref.py` (rembg, tight crop on white) |
 | Generation | `kaggle/vace_generate.ipynb` (Kaggle T4 / Colab, headless ComfyUI, `RUN_MODE` = `pairs` / `finals`), `scripts/build_kaggle_inputs.py` (presets `batter-v2`, `bowler`) |
-| Post | `scripts/retime.py` (default `blend`), `era_filters.py`, `make_sequence.py`, `make_final.py`, `make_match.py` |
-| Evaluation | `scripts/eval_metrics.py` (PCK@0.2, DINOv2 identity, flicker), `score_ablation.py`, `results/ablation.csv`, `results/ablation_runs.csv` |
-| Docs | `README_PIPELINE.md`, `CLAUDE.md`, `requirements-pipeline.txt`, `docs/REPORT_NOTES.md`, `docs/TEAM_INTEGRATION.md`, `docs/research/*`, `docs/report/` (`main.tex`, `refs.bib`, `figs/`), `docs/VIDEO_SCRIPT.md`, `scripts/make_figures.py` |
+| Post | `scripts/retime.py` (default `blend`; `hold` for slow motion), `era_filters.py`, `make_sequence.py`, `make_final.py`, `make_match.py` (`--bowler-era` / `--batter-era`), `make_catalog.py`, `make_presentation.py` |
+| Evaluation | `scripts/eval_metrics.py` (PCK@0.2, DINOv2 identity, flicker), `score_ablation.py`, `era_eval.py` (warping error), `results/ablation.csv`, `results/ablation_runs.csv`, `results/era_eval.csv` |
+| Docs | `docs/CATALOG.md`, `docs/VIDEO_NARRATION.md`, `README_PIPELINE.md`, `CLAUDE.md`, `requirements-pipeline.txt`, `docs/REPORT_NOTES.md`, `docs/TEAM_INTEGRATION.md`, `docs/research/*`, `docs/report/` (`main.tex`, `refs.bib`, `figs/`), `docs/VIDEO_SCRIPT.md`, `scripts/make_figures.py` |
 
 ## Key results
 - **Depth control fixes the bat.** One bat for the whole clip in 5/5 depth runs; the bat was lost in 2/2 skeleton runs. Depth also lowers brightness flicker. PCK@0.2 is 0.90-1.00 for all runs.
 - **A tighter reference crop did not clearly raise identity.** Seed variation (D1-D4) is larger than the reference effect.
 - **Batter final:** F1 `final_cap` (seed 42), chosen visually.
-- **Bowler (Larwood, L1-L3):** [TODO after the Kaggle run].
+- **Bowler (Larwood, L1-L3):**
+  - All three are bare-headed, with no fedora, cigarette or suit, no extra people (target-only depth) and no bat.
+  - Chosen: **L3** (seed 2024), for the most 1930s kit and the lowest flicker. It is shown at **2x slow motion** (frame holds; blending ghosted).
+  - PCK@0.2 0.79-0.85. Each 33-frame clip took ~520 s on the Kaggle T4, with a 12.8-14.9 GB peak.
+- **Milestone 4:**
+  - Era filters keep the motion: batter PCK -0.007 to -0.08, bowler up to -0.12. The 1930s look deliberately adds flicker.
+  - Cross-era catalog: one match per era, `match_crossera.mp4` (1930s Larwood vs 1990s Bradman) and a 46 s reel (`docs/CATALOG.md`).
 
 ## How to test
 ```powershell
@@ -49,7 +55,6 @@ Generated videos, model weights and `.npz` files are **not** in git (shared via 
 ## Checklist
 - [ ] Team agrees on merging into `main`
 - [ ] Individual contributions in `docs/report/main.tex` confirmed
-- [ ] Bowler results added (REPORT_NOTES 6.4, report Results)
 - [ ] Media on `main` reviewed before the repo goes public
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

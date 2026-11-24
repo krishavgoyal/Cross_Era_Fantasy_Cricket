@@ -16,6 +16,10 @@ Usage
   # bowler: the 2.0 s clip was sampled at real speed (33 frames @ 16 fps), so --source-duration 2.0 = no stretch
   python scripts/make_final.py --input data/gen/bowler_raw/L1_s42_33f.mp4 --tag _bowler --source-duration 2.0 ^
       --source-clip data/clips/B1_bowler.mp4 --control data/pose/bowler/depth_33.mp4 --title "Harold Larwood - bowling, reimagined"
+  # bowler in 2x SLOW MOTION (the 2.0 s of source stretched over 4.0 s; source panel in compare slowed too)
+  python scripts/make_final.py --input data/gen/bowler_raw/L3_s2024_33f.mp4 --tag _bowler --source-duration 4.0 ^
+      --source-real-duration 2.0 --source-clip data/clips/B1_bowler.mp4 --control data/pose/bowler/depth_33.mp4 ^
+      --title "Harold Larwood - bowling, reimagined (slow motion)"
 """
 from __future__ import annotations
 
@@ -49,8 +53,13 @@ def header(img: np.ndarray, text: str) -> np.ndarray:
 
 
 def make_compare(source_clip: str, source_start: float, duration: float, control: str, generated: Path,
-                 out: Path, fps: float = 24.0, height: int = 832, bands=None) -> Path:
-    """Side by side on one timeline: real source | control | generated result. `bands` = source areas to blur."""
+                 out: Path, fps: float = 24.0, height: int = 832, bands=None, real_duration: float | None = None) -> Path:
+    """Side by side on one timeline: real source | control | generated result. `bands` = source areas to blur.
+
+    duration = displayed seconds; real_duration = seconds of source they cover (default = duration). If they differ
+    (slow motion), the SOURCE panel is slowed by the same factor so all three panels stay in sync.
+    """
+    slow = duration / (real_duration or duration)               # 2.0 = shown at half speed
     src, sfps = read_video(source_clip)
     if bands is None:
         bands = OVERLAY_BANDS.get(Path(source_clip).stem, [])
@@ -63,13 +72,14 @@ def make_compare(source_clip: str, source_start: float, duration: float, control
     frames = []
     for i in range(int(round(duration * fps)) + 1):
         t = i / fps
-        a = frame_at(src, sfps, source_start + t)
+        a = frame_at(src, sfps, source_start + t / slow)
         a = cv2.resize(a, (int(round(a.shape[1] * height / a.shape[0])), height))
         b = ctl[min(len(ctl) - 1, int(round(t / ctl_step)))]
         b = cv2.resize(b, (int(round(b.shape[1] * height / b.shape[0])), height))
         c = frame_at(gen, gfps, t)
         c = cv2.resize(c, (int(round(c.shape[1] * height / c.shape[0])), height))
-        frames.append(np.hstack([header(a, "Real source (modern)"), header(b, kind),
+        tag = f" - {slow:g}x slow motion" if abs(slow - 1) > 1e-3 else ""
+        frames.append(np.hstack([header(a, "Real source (modern)" + tag), header(b, kind),
                                  header(c, "Generated (AI), 1930s style")]))
     return write_video(out, burn_label(frames), fps)
 
@@ -108,6 +118,9 @@ def main() -> int:
     ap.add_argument("--out-dir", default="data/final")
     ap.add_argument("--source-duration", type=float, default=5.6,
                     help="seconds of source the 33 frames cover (make_control --duration): 5.6 batter, 2.0 bowler")
+    ap.add_argument("--source-real-duration", type=float, default=None,
+                    help="seconds of source the clip really covers, if --source-duration is longer (slow motion), "
+                         "e.g. bowler: --source-duration 4.0 --source-real-duration 2.0 = 2x slow motion")
     ap.add_argument("--source-clip", default="data/clips/C2_coverdrive.mp4")
     ap.add_argument("--source-start", type=float, default=0.0)
     ap.add_argument("--control", default="data/pose/batter/depth_33.mp4", help="control video that generated --input")
@@ -138,7 +151,8 @@ def main() -> int:
     # 5) side-by-side comparison on the source timeline
     compare = make_compare(args.source_clip, args.source_start, args.source_duration, args.control,
                            styled["1930s_film"], out / f"compare{args.tag}.mp4", args.fps,
-                           bands=None if args.blur_source is None else ([] if args.blur_source == "none" else parse_bands(args.blur_source)))
+                           bands=None if args.blur_source is None else ([] if args.blur_source == "none" else parse_bands(args.blur_source)),
+                           real_duration=args.source_real_duration)
 
     print("\nChecks:")
     print(" ", check(final, (args.card_seconds, 99.0)))      # black-frame count over the clip part (after the card)

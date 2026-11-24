@@ -37,7 +37,7 @@ Bowler and batter are generated **separately** and cut together like a broadcast
 | Hardware | Kaggle **T4 16 GB**, one GPU (`CUDA_VISIBLE_DEVICES=0`); laptop RTX 4050 6 GB used only for CPU stages |
 | ComfyUI | v0.46.0 tag (falls back to latest if the tag is missing; record the actual version from the notebook log) **[TODO]** |
 | Prompt | "full-body photo of a cricketer in white flannels and cap holding a wooden cricket bat, plain sports ground background" |
-| Measured | Smoke test: **17 frames in 265 s** on the T4. 33-frame time and peak VRAM: **[TODO from kaggle_runs.csv]** |
+| Measured | Smoke test: **17 frames in 265 s** on the T4. 33 frames: **~520 s**, peak **12.8-14.9 GB** VRAM (bowler runs L1-L3). |
 
 ## 3. Kaggle bugs found and fixed
 
@@ -174,8 +174,74 @@ PCK is against each run's own control (pose runs vs the skeleton, depth runs vs 
 - **Runs** (`cefc-inputs-bowler.zip`, notebook `RUN_MODE = "pairs"`): L1/L2/L3 = target-only depth + `larwood_crop.png`, seeds 42 / 7 / 2024, 33 frames.
   - Prompt: "archival 1930s photograph, fast bowler, bare-headed with short neatly combed hair, face clearly visible, white long-sleeved flannel shirt and long white trousers, white boots, delivering a cricket ball with a high overarm bowling action, natural motion".
   - Negative: the default negative **without "missing bat"** (it would push the model to draw a bat), plus "cricket bat, cap, hat, fedora, suit, blazer, jacket, dark coat, cigarette, helmet, logo, purple shirt, coloured kit, shorts, bare legs, sleeveless, extra people".
-- **Match video:** `make_match.py` -> `data/final/final_match.mp4`: intro card "Harold Larwood vs Sir Don Bradman - Bodyline, reimagined", then "Larwood bowls" + bowler (1930s), then "Bradman drives" + batter (1930s, default `final_cap`, the chosen batter final).
-- **Results [TODO]:** L1-L3 PCK / identity vs `larwood_crop.png` and the original photo (`score_ablation.py`), visual check (bare-headed? no hat or cigarette? white kit? one ball, no bat, no extra people?), chosen seed.
+- **Match video:** `make_match.py` -> `data/final/final_match.mp4` (15.7 s):
+  - intro card "Harold Larwood vs Sir Don Bradman - Bodyline, reimagined";
+  - "Larwood bowls (slow motion)" + bowler L3, 1930s, **2x slow motion**: the 2.0 s of source stretched over 4.0 s;
+  - "Bradman drives" + batter F1, 1930s, real speed.
+- **Slow-motion retime:** `hold`, not `blend`. In 2x slow motion each generated frame spans three output frames, and blending ghosted badly on the fastest arm frames (two arms and two bodies). Holding steps at an effective 8 fps, which reads as hand-cranked film under the 1930s filter.
+
+**Results (Kaggle T4; `results/ablation.csv`, identity vs Larwood):**
+
+| Run | Seed | Kaggle time / peak VRAM | PCK@0.2 | DINO vs crop | DINO vs orig | Brightness std | Frame diff |
+|---|---|---|---|---|---|---|---|
+| L1 | 42 | 524.3 s / 14,885 MB | 0.788 | 0.124 | 0.108 | 4.26 | 12.17 |
+| L2 | 7 | 522.2 s / 12,837 MB | 0.851 | 0.092 | 0.102 | 4.93 | 15.42 |
+| **L3** | **2024** | 522.3 s / 12,837 MB | 0.801 | 0.125 | 0.086 | **1.81** | 11.06 |
+
+**Visual check** (every 4th frame):
+- All three are **bare-headed, with no fedora, cigarette or suit**, so the negative prompt worked against the reference clothing.
+- **No extra people**, so target-only depth removed the fielders.
+- **No bat.**
+- L1: cleanest ball release, but a grey short-sleeved shirt.
+- L2: sepia, clearest face, but the ball smears or duplicates in a few frames. This matches its highest frame difference (15.4).
+- L3: a knitted cardigan, the most 1930s kit; the ground is overexposed to white.
+- **Chosen: L3** (team preference for the period look). It also has the lowest brightness flicker (1.81).
+
+PCK is lower than the batter's (0.79-0.85 vs 0.88-0.99) because the overarm bowling action is the fastest motion in the project and the arm is motion-blurred. Identity is low against both references (0.09-0.13) because the reference shows a suit and fedora while the output shows bowling whites. As before, use it only to rank runs. Generating a 33-frame clip took about 520 s on the T4, with a peak of 12.8-14.9 GB, which is why the 6 GB laptop GPU could not run it.
+
+### 6.5 Era filters (Milestone 4): do they keep the motion?
+
+`scripts/era_eval.py`:
+- Each preset is applied to the **raw** 33-frame clip at its native timing (no retime), so only the filter's effect is measured.
+- Every version is sampled at the same 33 moments.
+- The warping error is ported from `student3_v3/evaluate.py`: Farneback flow warps frame t onto t+1, and the error is the mean luminance difference where forward and backward flow agree (lower = smoother).
+- Output: `results/era_eval.csv`.
+
+| Clip | Version | PCK@0.2 | DINO vs crop | Brightness std | Warp error |
+|---|---|---|---|---|---|
+| Bradman F1 | raw | 0.904 | 0.217 | 1.65 | 5.72 |
+| | 1930s film | 0.870 | 0.242 | 4.42 | 9.81 |
+| | 1970s TV | 0.829 | 0.217 | 1.99 | 4.06 |
+| | 1990s broadcast | 0.897 | 0.214 | 1.91 | 3.27 |
+| Larwood L3 | raw | 0.801 | 0.125 | 1.81 | 3.40 |
+| | 1930s film | 0.698 | 0.167 | 3.66 | 9.91 |
+| | 1970s TV | 0.684 | 0.147 | 1.93 | 3.08 |
+| | 1990s broadcast | 0.774 | 0.126 | 1.83 | 2.65 |
+
+Reading:
+- **The filters keep the motion.** For the batter, PCK drops by at most 0.08 (1970s, where chromatic aberration and scanlines disturb the pose detector most) and by only 0.007 for 1990s. The fast bowling arm loses more (up to 0.12), because blur and grain hide an already motion-blurred arm.
+- **The 1930s film filter deliberately adds flicker and texture:** brightness std rises 2-3x and warping error almost triples. The softer 1970s/1990s filters slightly *lower* the warping error, because blur smooths fine diffusion noise.
+- Identity vs the B&W reference rises slightly with the 1930s look (0.217 -> 0.242 batter, 0.125 -> 0.167 bowler), consistent with the reference being an old grayscale photo.
+- Frame-to-frame difference (in the csv) is not comparable across styles: 25 fps holds produce identical consecutive frames. The warping error on the common timeline is the fair temporal measure.
+
+### 6.6 Era preset settings (`scripts/era_filters.py`, seeded)
+
+| Preset | fps | Colour | Grain / noise | Blur / softness | Jitter | Flicker | Other |
+|---|---|---|---|---|---|---|---|
+| `1930s_film` | 18, uneven holds (jitter 0.35) | grayscale (`--sepia` optional), contrast 1.12, gamma 1.15, faded print | grain sigma 0.035 | lens blur sigma 0.8 | gate weave 2.0 px | 3.5 % | vignette 0.9, dust ~2/frame, vertical scratches (p 0.15) |
+| `1970s_tv` | 25 | saturation x0.62, warm cast | noise 3.0 | softness 0.6 | - | - | chromatic aberration 2 px, bloom 0.5, scanlines 8 %, tape-noise bands (p 0.25) |
+| `1990s_broadcast` | 25 | saturation x0.92 | noise 1.5 | softness 0.7, chroma bleed 1.6 px | - | - | faint bloom 0.25, mild vignette |
+
+All presets keep the clip duration (retime by frame holds) and burn the "AI-generated - academic project" label last.
+
+### 6.7 Cross-era catalog (Milestone 4)
+
+`scripts/make_catalog.py` -> `data/final/catalog/` (see `docs/CATALOG.md`):
+- `match_1930s_film.mp4`, `match_1970s_tv.mp4`, `match_1990s_broadcast.mp4`: the full match in one era, with the title cards filmed in that era ("1932 newsreel", "1975 television", "1995 broadcast").
+- **`match_crossera.mp4`**: Larwood in 1930s film bowls, Bradman in 1990s broadcast drives.
+- `catalog_reel.mp4` (45.7 s): all four back to back.
+
+Note: L3 itself came out nearly monochrome, so the bowler's 1970s/1990s versions differ mainly in texture (scanlines, softness, chroma bleed) rather than colour.
 
 ## 7. Limitations
 

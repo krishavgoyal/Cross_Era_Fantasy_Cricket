@@ -1,0 +1,9 @@
+timestamp,clip,version,video,fps,frames_sampled,pck@0.2,dino_crop_mean,dino_crop_min,brightness_std,frame_diff_mean,warp_err
+2026-11-24 19:57:10,batter_F1,raw,data\gen\v3_raw\final_cap_s42_33f.mp4,16.0,33,0.9037,0.2168,0.0649,1.652,11.926,5.716
+2026-11-24 19:57:36,batter_F1,1930s_film,data\final\eval\final_cap_s42_33f_1930s_film.mp4,18.0,33,0.8699,0.2422,0.1112,4.415,14.977,9.812
+2026-11-24 19:58:03,batter_F1,1970s_tv,data\final\eval\final_cap_s42_33f_1970s_tv.mp4,25.0,33,0.8289,0.2168,0.0952,1.986,5.65,4.064
+2026-11-24 19:58:28,batter_F1,1990s_broadcast,data\final\eval\final_cap_s42_33f_1990s_broadcast.mp4,25.0,33,0.8966,0.2144,0.0658,1.91,5.857,3.273
+2026-11-24 19:59:01,bowler_L3,raw,data\gen\bowler_raw\L3_s2024_33f.mp4,16.0,33,0.8007,0.1248,-0.0002,1.813,11.057,3.405
+2026-11-24 19:59:23,bowler_L3,1930s_film,data\final\eval\L3_s2024_33f_1930s_film.mp4,18.0,33,0.6984,0.1665,0.0382,3.661,16.155,9.908
+2026-11-24 19:59:42,bowler_L3,1970s_tv,data\final\eval\L3_s2024_33f_1970s_tv.mp4,25.0,33,0.684,0.1467,0.02,1.931,6.332,3.079
+2026-11-24 20:00:04,bowler_L3,1990s_broadcast,data\final\eval\L3_s2024_33f_1990s_broadcast.mp4,25.0,33,0.7738,0.1258,0.0167,1.832,6.396,2.655

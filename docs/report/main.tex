@@ -58,7 +58,7 @@ U$^2$-Net~\cite{qin2020u2net} (via rembg) removes reference backgrounds.
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=0.86\textwidth]{figs/pipeline.png}
+  \includegraphics[width=0.74\textwidth]{figs/pipeline.png}
   \caption{Pipeline. Laptop CPU stages in blue/green, the Kaggle T4 stage in orange.}
   \label{fig:pipeline}
 \end{figure*}
@@ -84,15 +84,17 @@ into the canvas.
 
 \textbf{Generation.} Wan2.1-VACE-1.3B (fp16 DiT, fp8 UMT5 text encoder) runs in ComfyUI driven headlessly through its
 API on a Kaggle T4 (no bf16, so fp16 with an fp32 VAE): 20 steps, CFG 5, \texttt{uni\_pc}, shift 8, seed 42 unless
-stated. A 17-frame run takes ${\approx}$265--280\,s. Three Kaggle-specific bugs (dependency filtering, dataset mount depth,
+stated. A 17-frame run takes ${\approx}$270\,s and a 33-frame run ${\approx}$520\,s with a 12.8--14.9\,GB peak, far
+beyond the 6\,GB laptop GPU. Three Kaggle-specific bugs (dependency filtering, dataset mount depth,
 input previews listed as outputs) were fixed in the notebook. The prompt describes 1930s kit; the negative prompt lists
 failure modes (extra balls, two bats, modern logos; for the bowler also bat, hat, suit and cigarette).
 
 \textbf{Post-processing.} The batter's 33 frames cover 5.6\,s of source, so they play $2.7{\times}$ too fast at 16\,fps.
 We retime to real speed at 24\,fps. Frame blending (ffmpeg \texttt{framerate}) was chosen over motion-compensated
-interpolation (\texttt{minterpolate}), which tore the thin bat and drifted in timing. Seeded OpenCV era filters
-(1930s film: grayscale, grain, gate weave, flicker, dust, 18\,fps; 1970s TV; 1990s broadcast) keep the duration and burn
-an ``AI-generated'' label into every frame.
+interpolation (\texttt{minterpolate}), which tore the thin bat and drifted in timing. The 2.0\,s bowler clip is sampled at
+real speed and shown in $2{\times}$ slow motion with frame holds (blending ghosted at that factor). Seeded OpenCV era
+filters (Table~\ref{tab:eras}) keep the duration and burn an ``AI-generated'' label into every frame. Bowler and batter
+can be styled in different eras for a cross-era match.
 
 \section{Experiments}
 \textbf{Metrics} (CPU). \emph{PCK@0.2}: DWPose is re-run on the output and the 17 body joints are compared with the
@@ -104,7 +106,10 @@ between grayscale person crops of each frame and of the tight (``crop'') or orig
 42: A (skeleton, padded; older prompt, no margin), B (depth, padded), C (skeleton, crop), D1 (depth, crop). D1--D4 repeat
 D1's inputs with seeds 42/7/123/2024 to measure seed variance. B vs D1 isolates the reference, and C vs D1 the control.
 \textbf{Finals.} 33-frame depth + crop runs with the default prompt (F1, cap) and a bare-headed prompt (F2).
-\textbf{Bowler.} L1--L3: target-only depth + Larwood crop, seeds 42/7/2024, 33 frames at real speed.
+\textbf{Bowler.} L1--L3: target-only depth + Larwood crop, seeds 42/7/2024, 33 frames (real speed; shown at
+$2{\times}$ slow motion). \textbf{Era filters.} Each preset is applied to the raw F1 and L3 clips at native timing; besides
+PCK and identity we report a Farneback warping error (luminance error after warping frame $t$ onto $t{+}1$ where
+forward/backward flow agree; lower = smoother).
 
 \section{Results}
 \begin{table}[t]
@@ -125,17 +130,19 @@ D4 & depth & crop & 0.990 & 0.302 & 0.305 & 1.25 & 10.40\\
 F1 & depth & crop & 0.904 & 0.217 & 0.175 & 1.65 & 11.93\\
 F2 & depth & crop & 0.882 & 0.203 & 0.195 & 3.78 & 9.17\\
 \midrule
-L1--L3 & depth$^\dagger$ & crop & \multicolumn{5}{c}{[TODO: bowler numbers]}\\
+L1 & depth$^\dagger$ & crop & 0.788 & 0.124 & 0.108 & 4.26 & 12.17\\
+L2 & depth$^\dagger$ & crop & 0.851 & 0.092 & 0.102 & 4.93 & 15.42\\
+L3 & depth$^\dagger$ & crop & 0.801 & 0.125 & 0.086 & 1.81 & 11.06\\
 \bottomrule
 \end{tabular}
-\caption{Ablation (17 frames; F1/F2 and L: 33 frames). D1--D4 differ only in seed (42/7/123/2024).
+\caption{Ablation (17 frames; F1/F2 and L: 33 frames). D1--D4 differ only in seed (42/7/123/2024); L1--L3 seeds 42/7/2024.
 $^\dagger$target-only depth. Identity for L1--L3 is measured against Larwood.}
 \label{tab:ablation}
 \end{table}
 
 \begin{figure*}[t]
   \centering
-  \includegraphics[width=0.78\textwidth]{figs/ablation_strip.png}
+  \includegraphics[width=0.62\textwidth]{figs/ablation_strip.png}
   \caption{Ablation outputs (raw, 17 frames). With the skeleton (A, C) the bat is lost or wrong; with depth (D1) one bat
   is held for the whole clip. A dark cap hides the face in the crop runs.}
   \label{fig:ablation}
@@ -156,9 +163,18 @@ Single-seed likeness comparisons are therefore inconclusive; the bat result is n
 failed in 2/2 skeleton runs. D3/D4 also drifted to modern dark pads.
 \textbf{Finals.} F1 and F2 are close numerically (Table~\ref{tab:ablation}). We chose \textbf{F1 (cap)} by visual
 inspection, for its better face and cleaner bat (Fig.~\ref{fig:final}).
-\textbf{Bowler.} [TODO: L1--L3 visual verdict (bare-headed? no fedora/cigarette? white kit? no bat? one ball? no extra
-people?), numbers, chosen seed; the bowler strip goes in \texttt{figs/bowler\_strip.png}.]
+\textbf{Bowler.} All three runs are bare-headed with no fedora, cigarette or suit (the negative prompt overrode the
+reference clothing), show no extra people (target-only depth removed the fielders) and no bat. L1 has the cleanest
+release but a grey short-sleeved shirt; L2 the clearest face, but the ball smears (highest frame difference); L3 a
+knitted cardigan, the most 1930s kit, and the lowest flicker. We chose \textbf{L3}, shown at $2{\times}$ slow motion.
+PCK is lower than for the batter (0.79--0.85) because the overarm action is the fastest, most blurred motion.
+\textbf{Era filters} (Table~\ref{tab:eras}, Fig.~\ref{fig:eras}) keep the motion: the batter's PCK drops by at most
+0.08 (0.007 for 1990s), the fast bowling arm by up to 0.12. The 1930s look deliberately adds flicker and texture
+(brightness std ${\approx}2.5{\times}$, warping error ${\approx}1.7{-}2.9{\times}$), while the softer 1970s/1990s filters
+slightly lower the warping error. In the cross-era match, Larwood bowls in 1930s film and Bradman drives in 1990s broadcast.
 
+% PAGE BUDGET: if the PDF exceeds 4 pages, delete this figure first (its content is also in the video),
+% then shrink figs/ablation_strip.png further.
 \begin{figure}[t]
   \centering
   \includegraphics[width=\columnwidth]{figs/final_strip.png}
@@ -166,12 +182,39 @@ people?), numbers, chosen seed; the bowler strip goes in \texttt{figs/bowler\_st
   \label{fig:final}
 \end{figure}
 
+\begin{table}[t]
+\centering\small
+\setlength{\tabcolsep}{2.6pt}
+\begin{tabular}{llcc}
+\toprule
+Preset & Look & PCK bat/bowl & Warp bat/bowl\\
+\midrule
+raw & VACE output, 16\,fps & 0.904 / 0.801 & 5.72 / 3.40\\
+1930s film & 18\,fps uneven, gray, grain, weave, & 0.870 / 0.698 & 9.81 / 9.91\\
+ & flicker, dust, scratches, vignette & & \\
+1970s TV & 25\,fps, desat., warm, chrom. aberr., & 0.829 / 0.684 & 4.06 / 3.08\\
+ & scanlines, tape noise, bloom & & \\
+1990s bcast & 25\,fps, mild colour, chroma bleed, soft & 0.897 / 0.774 & 3.27 / 2.65\\
+\bottomrule
+\end{tabular}
+\caption{Era presets and their effect on Bradman F1 / Larwood L3 (raw clip styled at native timing).}
+\label{tab:eras}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figs/era_strip.png}
+  \caption{The same moment raw and in the three era styles (batter F1, bowler L3).}
+  \label{fig:eras}
+\end{figure}
+
 \section{Limitations and Ethics}
 \textbf{Limitations.} Likeness is weak: identity scores are low in absolute terms (whole-body DINOv2 crops also measure
 clothing and pose, so they rank runs rather than measure likeness). The depth map carries the modern helmet's outline,
 so a dark cap often hides the face. The model copies reference clothing (Larwood's 1929 photo shows a fedora, suit and
 cigarette, which we suppress only through the negative prompt). Clips are short (2--5.6\,s), single-player and
-single-seed for the finals. Bowler and batter are generated separately and cut together, not as one interaction.
+single-seed for the finals. Bowler and batter are generated separately and cut together, not as one interaction; the bowler is shown in
+slow motion and L3 came out nearly monochrome, so its later-era versions differ mainly in texture.
 \textbf{Ethics.} The videos depict real, deceased public figures in actions they never performed. Every generated frame
 and title card carries a burned-in ``AI-generated -- academic project'' label, and the work is for academic use only.
 Reference photos are public domain (Larwood: National Library of Australia, Fairfax glass plate, 1929,

@@ -3,8 +3,8 @@
   ablation_strip.png   rows A / C / D1 (17-frame runs), 6 evenly spaced frames each
   final_strip.png      source clip | depth control | final_cap (1930s), same timestamps
   pipeline.png         pipeline diagram
-  bowler_strip.png     source | depth (target-only) | Larwood 1930s, once data/gen/bowler_raw/<run>.mp4 exists;
-                       otherwise a labelled placeholder (re-run this script after the bowler outputs arrive)
+  bowler_strip.png     source | depth (target-only) | Larwood L3 1930s (2x slow motion, sampled on source time)
+  era_strip.png        the same moment raw / 1930s / 1970s / 1990s, batter and bowler (needs era_eval.py first)
 
 Usage:  python scripts/make_figures.py            (options: --bowler-run L1_s42_33f)
 """
@@ -99,8 +99,10 @@ def ablation_strip(n: int = 6) -> Path:
 
 
 def timeline_strip(source: str, control: str, generated: str, duration: float, times: list[float],
-                   labels: tuple[str, str, str], out_name: str, source_start: float = 0.0) -> Path:
-    """Rows: source / control / generated (styled, real speed), sampled at the same source times."""
+                   labels: tuple[str, str, str], out_name: str, source_start: float = 0.0, gen_slow: float = 1.0) -> Path:
+    """Rows: source / control / generated (styled), sampled at the same SOURCE times.
+
+    gen_slow = playback slow-down of the generated clip (2.0 for the bowler shown in 2x slow motion)."""
     src, sfps = frames_of(source)
     bands = OVERLAY_BANDS.get(Path(source).stem, [])
     src = [blur_bands(f, bands) for f in src] if bands else src          # hide social-media overlays
@@ -110,7 +112,7 @@ def timeline_strip(source: str, control: str, generated: str, duration: float, t
     pick = lambda fr, fps, t: fr[min(len(fr) - 1, int((t) * fps + 1e-6))]
     rows = [(labels[0], [fit(pick(src, sfps, source_start + t)) for t in times]),
             (labels[1], [fit(ctl[min(len(ctl) - 1, int(round(t / step)))]) for t in times]),
-            (labels[2], [fit(pick(gen, gfps, t)) for t in times])]
+            (labels[2], [fit(pick(gen, gfps, t * gen_slow)) for t in times])]
     out = OUT / out_name
     grid(rows, [f"t = {t:.1f} s" for t in times]).save(out)
     return out
@@ -172,7 +174,8 @@ def pipeline_diagram() -> Path:
     return out
 
 
-def bowler_strip(run: str) -> Path:
+def bowler_strip(run: str, slow: float = 2.0) -> Path:
+    """source | target-only depth | Larwood 1930s (the styled clip is in `slow`x slow motion)."""
     video = Path(f"data/gen/bowler_raw/{run}.mp4")
     styled = Path(f"data/final/work/{run}_retimed_1930s_film.mp4")
     out = OUT / "bowler_strip.png"
@@ -180,22 +183,39 @@ def bowler_strip(run: str) -> Path:
         return timeline_strip("data/clips/B1_bowler.mp4", "data/pose/bowler/depth_33.mp4", str(styled), 2.0,
                               [0.1, 0.5, 0.9, 1.2, 1.5, 1.9],
                               ("Source\n(modern)", "Depth\n(target only)", f"Larwood\n{run.split('_')[0]}, 1930s"),
-                              "bowler_strip.png")
+                              "bowler_strip.png", gen_slow=slow)
     img = Image.new("RGB", (190 + 6 * 164, 3 * 281 + 30), "#f4f4f4")
     d = ImageDraw.Draw(img)
     d.rectangle((4, 4, img.width - 5, img.height - 5), outline="#999999", width=3)
-    msg = (f"PLACEHOLDER - bowler strip (source | target-only depth | Larwood 1930s)\n"
-           f"Missing {video if not video.exists() else styled}.\n"
-           "Download the Kaggle L1-L3 outputs to data/gen/bowler_raw/, run make_final.py for the chosen run,\n"
-           "then re-run: python scripts/make_figures.py --bowler-run <run>")
-    d.multiline_text((40, img.height // 2 - 60), msg, fill="#444444", font=font(22), spacing=10)
+    msg = (f"PLACEHOLDER - bowler strip: missing {video if not video.exists() else styled}.\n"
+           "Run make_final.py for the chosen bowler run, then: python scripts/make_figures.py --bowler-run <run>")
+    d.multiline_text((40, img.height // 2 - 40), msg, fill="#444444", font=font(22), spacing=10)
     img.save(out)
+    return out
+
+
+def era_strip() -> Path:
+    """The same moment in raw / 1930s / 1970s / 1990s (styled at native timing by era_eval.py): batter + bowler rows."""
+    clips = [("Bradman\n(batter F1)", "data/gen/v3_raw/final_cap_s42_33f.mp4", 19),
+             ("Larwood\n(bowler L3)", "data/gen/bowler_raw/L3_s2024_33f.mp4", 18)]
+    presets = ["1930s_film", "1970s_tv", "1990s_broadcast"]
+    rows = []
+    for label, raw, i in clips:
+        fr, fps = frames_of(raw)
+        t = i / fps                                              # the same moment in every version
+        tiles = [fit(fr[i])]
+        for p in presets:
+            sfr, sfps = frames_of(Path("data/final/eval") / f"{Path(raw).stem}_{p}.mp4")
+            tiles.append(fit(sfr[min(len(sfr) - 1, int(t * sfps + 1e-6))]))
+        rows.append((label, tiles))
+    out = OUT / "era_strip.png"
+    grid(rows, ["raw (VACE)", "1930s film", "1970s TV", "1990s broadcast"]).save(out)
     return out
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--bowler-run", default="L1_s42_33f", help="bowler output name (without .mp4)")
+    ap.add_argument("--bowler-run", default="L3_s2024_33f", help="bowler output name (without .mp4)")
     ap.add_argument("--final", default="data/final/work/final_cap_s42_33f_retimed_1930s_film.mp4",
                     help="styled batter final (real speed) for the final strip")
     args = ap.parse_args()
@@ -206,6 +226,7 @@ def main() -> int:
                          ("Source\n(modern)", "Depth\ncontrol", "Bradman\nfinal_cap, 1930s"), "final_strip.png"))
     print(pipeline_diagram())
     print(bowler_strip(args.bowler_run))
+    print(era_strip())
     return 0
 
 

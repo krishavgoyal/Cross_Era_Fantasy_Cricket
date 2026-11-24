@@ -49,7 +49,18 @@ def wrap_text(text: str, max_chars: int) -> list[str]:
     return lines + ([cur] if cur else [])
 
 
+def card_frames(text: str, size: tuple[int, int], seconds: float, fps: float, subtitle: str | None = None,
+                label: bool = True) -> list[np.ndarray]:
+    """Frames of a black title card (centred wrapped text, optional grey subtitle, optional AI label)."""
+    return _card(text, size, seconds, fps, subtitle, label)
+
+
 def make_card(text: str, size: tuple[int, int], seconds: float, fps: float, path: Path, subtitle: str | None = None) -> Path:
+    """Write a title card video (with the AI label)."""
+    return write_video(path, _card(text, size, seconds, fps, subtitle, True), fps)
+
+
+def _card(text: str, size: tuple[int, int], seconds: float, fps: float, subtitle: str | None, label: bool) -> list[np.ndarray]:
     """Black title card with centred, wrapped white text, an optional smaller grey subtitle line and the AI label."""
     w, h = size
     scale = max(0.6, w / 640)
@@ -69,8 +80,8 @@ def make_card(text: str, size: tuple[int, int], seconds: float, fps: float, path
             (tw, _), _ = cv2.getTextSize(line, cv2.FONT_HERSHEY_SIMPLEX, sub_scale, 1)
             cv2.putText(frame, line, ((w - tw) // 2, y0 + len(lines) * line_h + int(scale * 20) + j * int(scale * 28)),
                         cv2.FONT_HERSHEY_SIMPLEX, sub_scale, (190, 190, 190), 1, cv2.LINE_AA)
-    frames = burn_label([frame] * max(1, int(round(seconds * fps))))
-    return write_video(path, frames, fps)
+    frames = [frame.copy() for _ in range(max(1, int(round(seconds * fps))))]
+    return burn_label(frames) if label else frames
 
 
 def build_sequence(clips: list[str], cards: list[str | None], intro: str | None, outro: str | None, out: Path,
