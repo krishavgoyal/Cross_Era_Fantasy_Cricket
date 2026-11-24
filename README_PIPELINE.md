@@ -110,6 +110,22 @@ python scripts\make_sequence.py --clips data\styled\bowler_33f_1970s_tv.mp4 data
 
 All parts are letterboxed to the first clip's size and 25 fps (`--size`, `--fps` to change); title cards carry the AI-generated label.
 
+## Likeness + bat ablation (v2)
+
+```powershell
+# tight reference: background removed, on white, body ~90% of 480x832, head near the top -> check data\refs\ref_compare.png
+python scripts\prepare_ref.py --input "C:\Users\ASUS V16\Downloads\bradman_raw.tif" --out data\refs\bradman_crop.png
+# pose control with an 8% top margin (keeps the old control_33.* untouched)
+python scripts\make_control.py --pose data\pose\batter\raw.npz --out data\pose\batter --start 0 --duration 5.6 --top-margin 0.08 --name control_33_margin
+# depth control, same timing/crop as the pose control -> check depth_preview.mp4 and depth_align_check.jpg
+python scripts\make_depth_control.py --video data\clips\C2_coverdrive.mp4 --pose data\pose\batter\raw.npz --out data\pose\batter --start 0 --duration 5.6 --top-margin 0.08 --soften-head
+# Kaggle input zip (C:\cefc\cefc-inputs-v2.zip) with runs B, C, D1-D4
+python scripts\build_kaggle_inputs.py
+# after the Kaggle run: put outputs_raw files in data\gen\v2_raw\ (run A in data\gen\v1_raw\), then
+python scripts\score_ablation.py          # -> results\ablation.csv
+```
+The plan and baseline numbers are in `docs/REPORT_NOTES.md`, section 5.
+
 ## Background
 - `README.md`: the teammates' original engine (AnimateDiff-based)
 - `docs/PROJECT_PROPOSAL.md`: the original proposal.

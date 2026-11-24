@@ -68,14 +68,18 @@ def smooth(k: np.ndarray, window: int, order: int) -> np.ndarray:
     return out
 
 
+def sample_positions(n_src: int, src_fps: float, start: float, duration: float, n: int) -> np.ndarray:
+    """Fractional SOURCE frame index for each of the n output frames (shared by pose and depth controls)."""
+    pos = (start + np.linspace(0.0, duration, n)) * src_fps
+    if pos[-1] > n_src - 1:
+        print(f"WARNING: clip has {n_src / src_fps:.2f} s but {start + duration:.2f} s requested; last frames are held")
+    return np.clip(pos, 0, n_src - 1)
+
+
 def resample(k: np.ndarray, src_fps: float, start: float, duration: float, n: int) -> np.ndarray:
     """Sample n frames evenly over [start, start+duration] seconds of the source (linear interpolation)."""
     T = k.shape[0]
-    times = start + np.linspace(0.0, duration, n)
-    pos = times * src_fps
-    if pos[-1] > T - 1:
-        print(f"WARNING: clip has {T / src_fps:.2f} s but {start + duration:.2f} s requested; last frames are held")
-    pos = np.clip(pos, 0, T - 1)
+    pos = sample_positions(T, src_fps, start, duration, n)
     lo = np.floor(pos).astype(int)
     hi = np.minimum(lo + 1, T - 1)
     a = (pos - lo)[:, None, None]
@@ -152,17 +156,66 @@ def retarget(k: np.ndarray, ref_k133: np.ndarray) -> np.ndarray:
 
 
 # ------------------------------------------------------------------ canvas placement
-def fit_to_canvas(k: np.ndarray, width: int, height: int, height_frac: float) -> np.ndarray:
-    """One scale + offset for the whole clip: body ~height_frac of canvas height, everything inside."""
+def canvas_transform(k: np.ndarray, width: int, height: int, height_frac: float, top_margin: float = 0.0):
+    """One scale s and offset for the whole clip, so that canvas = (src - centre) * s + offset.
+
+    Body ~height_frac of the canvas height, everything inside. With top_margin > 0 the content is placed in the
+    region below top_margin*height, and the box includes an estimate of the top of the head (above the eyes/ears),
+    so the head never touches the top edge. top_margin = 0 gives exactly the original behaviour.
+    """
     body = k[:, :17]
     h_per_frame = np.nanmax(body[..., 1], axis=1) - np.nanmin(body[..., 1], axis=1)
     n_valid = np.isfinite(body[..., 1]).sum(axis=1)
     body_h = np.nanmedian(h_per_frame[n_valid >= 8]) if (n_valid >= 8).any() else np.nanmedian(h_per_frame)
     x0, y0 = np.nanmin(body[..., 0]), np.nanmin(body[..., 1])
     x1, y1 = np.nanmax(body[..., 0]), np.nanmax(body[..., 1])
-    s = min(height_frac * height / body_h, 0.95 * width / (x1 - x0), 0.95 * height / (y1 - y0))
+    if top_margin <= 0:
+        s = min(height_frac * height / body_h, 0.95 * width / (x1 - x0), 0.95 * height / (y1 - y0))
+        centre = np.array([(x0 + x1) / 2, (y0 + y1) / 2], np.float32)
+        return float(s), centre, np.array([width / 2, height / 2], np.float32)
+    # head top: about 0.9 x (neck-to-nose distance) above the nose
+    neck = (k[:, L_SHO] + k[:, R_SHO]) / 2
+    head = np.nanmedian(np.linalg.norm(neck - k[:, NOSE], axis=1))
+    head_top = np.nanmin(k[:, NOSE, 1] - 0.9 * head) if np.isfinite(head) else y0
+    y0 = min(y0, head_top)
+    feet = k[:, 17:23]                                    # toes/heels sit below the ankles: keep them inside too
+    x0, x1 = min(x0, np.nanmin(feet[..., 0])), max(x1, np.nanmax(feet[..., 0]))
+    y1 = max(y1, np.nanmax(feet[..., 1]))
+    avail = height * (1 - top_margin)                     # content area below the margin
+    s = min(height_frac * avail / body_h, 0.95 * width / (x1 - x0), 0.97 * avail / (y1 - y0))
     centre = np.array([(x0 + x1) / 2, (y0 + y1) / 2], np.float32)
-    return (k - centre) * s + np.array([width / 2, height / 2], np.float32)
+    return float(s), centre, np.array([width / 2, top_margin * height + avail / 2], np.float32)
+
+
+def apply_transform(k: np.ndarray, T) -> np.ndarray:
+    s, centre, offset = T
+    return (k - centre) * s + offset
+
+
+def transform_matrix(T) -> np.ndarray:
+    """2x3 affine for cv2.warpAffine that maps SOURCE image pixels onto the canvas (same as apply_transform)."""
+    s, (cx, cy), (ox, oy) = T
+    return np.float32([[s, 0, ox - s * cx], [0, s, oy - s * cy]])
+
+
+def fit_to_canvas(k: np.ndarray, width: int, height: int, height_frac: float, top_margin: float = 0.0) -> np.ndarray:
+    """Backwards-compatible wrapper: transform computed from k and applied to k."""
+    return apply_transform(k, canvas_transform(k, width, height, height_frac, top_margin))
+
+
+def clean_resampled(pose_npz: str, frames: int, fps: float, start: float, duration: float | None, thr: float = 0.3,
+                    max_gap: int = 4, sg_window: int = 7, sg_order: int = 2):
+    """raw.npz -> cleaned keypoints resampled to `frames` output frames (SOURCE pixel coordinates).
+
+    Returns (kpts[frames,133,2], data, sample_pos, duration). sample_pos = fractional source frame per output frame.
+    """
+    data = np.load(pose_npz)
+    src_fps = float(data["fps"])
+    k = masked(data["kpts"], data["scores"], thr)
+    k = smooth(fill_gaps(k, max_gap), sg_window, sg_order)
+    duration = duration if duration is not None else (frames - 1) / fps
+    pos = sample_positions(k.shape[0], src_fps, start, duration, frames)
+    return resample(k, src_fps, start, duration, frames), data, pos, duration
 
 
 def imread_any(path: str) -> np.ndarray:
@@ -190,6 +243,9 @@ def main() -> int:
     ap.add_argument("--sg-window", type=int, default=7, help="Savitzky-Golay window (source frames, odd)")
     ap.add_argument("--sg-order", type=int, default=2)
     ap.add_argument("--height-frac", type=float, default=0.85, help="body height as a fraction of the canvas")
+    ap.add_argument("--top-margin", type=float, default=0.0,
+                    help="empty band at the top (fraction of height) so the head never touches the edge, e.g. 0.08")
+    ap.add_argument("--name", default=None, help="output base name (default control_<frames>)")
     ap.add_argument("--ref-photo", help="reference photo: scale bone lengths to this person's proportions")
     ap.add_argument("--no-face", action="store_true")
     ap.add_argument("--no-hands", action="store_true")
@@ -197,14 +253,14 @@ def main() -> int:
     if (args.frames - 1) % 4:
         print(f"WARNING: --frames {args.frames} is not 4n+1; VACE may trim it")
 
-    data = np.load(args.pose)
+    k, data, _, duration = clean_resampled(args.pose, args.frames, args.fps, args.start, args.duration, args.thr,
+                                           args.max_gap, args.sg_window, args.sg_order)
     src_fps = float(data["fps"])
-    k = masked(data["kpts"], data["scores"], args.thr)
-    k = smooth(fill_gaps(k, args.max_gap), args.sg_window, args.sg_order)
-    duration = args.duration if args.duration is not None else (args.frames - 1) / args.fps
-    k = resample(k, src_fps, args.start, duration, args.frames)
     print(f"Source {data['kpts'].shape[0]} frames @ {src_fps:.2f} fps -> {args.frames} frames "
           f"covering {args.start:.2f}-{args.start + duration:.2f} s")
+    # canvas placement is computed from the SOURCE geometry (before retargeting) so that depth controls made by
+    # make_depth_control.py with the same settings line up with this pose control frame by frame
+    T = canvas_transform(k, args.width, args.height, args.height_frac, args.top_margin)
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -221,14 +277,14 @@ def main() -> int:
             cv2.imwrite(str(out / "ref_pose.jpg"), cv2.cvtColor(vis, cv2.COLOR_RGB2BGR))
             k = retarget(k, masked(ref_k, ref_s, args.thr))
 
-    k = fit_to_canvas(k, args.width, args.height, args.height_frac)
+    k = apply_transform(k, T)
 
     frames = []
     for t in range(args.frames):
         canvas = np.zeros((args.height, args.width, 3), np.uint8)
         draw_openpose(canvas, k[t], hands=not args.no_hands, face=not args.no_face)
         frames.append(cv2.cvtColor(canvas, cv2.COLOR_RGB2BGR))
-    name = f"control_{args.frames}"
+    name = args.name or f"control_{args.frames}"
     write_video(out / f"{name}.mp4", frames, args.fps)
     np.savez_compressed(out / f"{name}.npz", kpts=k.astype(np.float32), fps=args.fps,
                         size=np.array([args.width, args.height]))

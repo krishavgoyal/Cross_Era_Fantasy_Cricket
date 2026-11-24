@@ -58,7 +58,40 @@ From the Phase 0 research (`docs/research/PHASE0_RESEARCH.md`, `docs/research/PH
 - **VACE-1.3B** accepts a reference image plus a pose control video, is Apache-2.0, is small enough for a free T4, and runs with ComfyUI core nodes. The official Wan2.1 repo was not used: it hard-requires `flash_attn` and loads the fp32 model whole onto the GPU.
 - Platform: Kaggle's free T4. Google Colab was avoided because its FAQ prohibits "creating deepfakes" and web UIs on the free tier.
 
-## 5. Results [TODO]
+## 5. Ablation: likeness and bat (2x2 + seeds)
+
+**Problem seen in run A** (pose skeleton + padded `bradman.png`, seed 42, 17 frames): generic face, a wrong or missing bat (the skeleton carries no bat), extra balls, and the head cut off at the top of the frame.
+
+**Two changes, tested separately and together:**
+
+| Factor | Old | New | Script |
+|---|---|---|---|
+| Control | OpenPose skeleton (`control_33`, no margin) | **Depth** (Depth Anything V2 Small, Apache-2.0): carries the bat and the body volume. One global min/max over all frames (no flicker), near = bright, head region flattened (`--soften-head`) so the modern helmet does not override the face | `make_depth_control.py` |
+| Reference | `bradman.png`: photo letterboxed with large white bands, face small | **`bradman_crop.png`**: background removed (rembg u2net, bat kept), on pure white, subject fills 90% of the height, head 3% from the top; up to 15% of the subject box trimmed per side (elbow and lap) | `prepare_ref.py` |
+| Framing | Skeleton touched the top edge | `--top-margin 0.08` on both pose and depth controls (head-top estimate and feet included in the box), same canvas transform for both, so they line up frame by frame | `make_control.py` |
+
+| | Padded ref `bradman.png` | Tight ref `bradman_crop.png` |
+|---|---|---|
+| **Pose control** | **A** (seed 42, done) | **C** (seed 42) |
+| **Depth control** | **B** (seed 42) | **D1-D4** (seeds 42, 7, 123, 2024) |
+
+- All new runs: 17 frames, 480x832, 16 fps, 20 steps, cfg 5, shift 8, new prompt ("archival 1930s photograph style, cricketer in white flannel shirt and trousers and a cap, holding one wooden cricket bat with both hands, playing a cover drive, natural motion"), negative prompt extended with "extra balls, multiple balls, two bats, deformed bat, hockey stick, extra limbs, extra fingers, cropped head, helmet, modern logos".
+- Run A used the old prompt and the no-margin pose control, so A vs C mixes the reference change with the prompt and margin change. B vs D1 (same control, same prompt, same seed) is the clean test of the reference; C vs D1 is the clean test of the control.
+- D1-D4 differ only in the seed: their spread shows how much of any difference is just seed noise. The best D seed is then re-run at 33 frames (`BEST_SEED` cell in the notebook) and used for the final video.
+
+**Measured** with `scripts/score_ablation.py` (run list in `results/ablation_runs.csv`) into `results/ablation.csv`: PCK@0.2 against each run's own control (17-frame runs are scored on the first 17 control frames), DINOv2 identity against both references, flicker. **Also check by eye:** one bat (not two, not a hockey stick), no extra balls, the whole head in frame, and whether the face looks more like the photo.
+
+**Baseline (run A and the earlier 33-frame run, scored 2026-11-24):**
+
+| Run | Control | Ref | Frames | PCK@0.2 | DINO vs crop (mean) | DINO vs orig (mean) | Brightness std | Frame diff |
+|---|---|---|---|---|---|---|---|---|
+| A | pose (no margin) | padded | 17 | 0.934 | 0.205 | 0.158 | 2.27 | 10.10 |
+| A, 33 frames | pose (no margin) | padded | 33 | 0.882 | 0.189 | 0.124 | 4.46 | 12.55 |
+| B / C / D1-D4 | | | 17 | [TODO] | [TODO] | [TODO] | | |
+
+Reading: motion following is already good (PCK 0.88-0.93), so the problem is appearance. The low identity scores (about 0.2) match the generic face seen by eye. These are whole-body crops: the reference shows a seated man in a suit and the output a standing batter in whites, so the absolute values are low for every run. **Compare runs with each other, not with 1.0.**
+
+## 6. Results [TODO]
 
 Paste from `results/metrics.csv` (raw vs styled, VACE vs AnimateDiff baseline):
 
@@ -70,7 +103,7 @@ Paste from `results/metrics.csv` (raw vs styled, VACE vs AnimateDiff baseline):
 
 How to read them: PCK@0.2 = share of body joints within 20% of the torso length of where the control put them. DINO = cosine similarity of image features (1 = identical). Lower brightness std / frame diff = less flicker. Styled versions are expected to score lower on PCK/DINO because grain, blur and jitter are added on purpose.
 
-## 6. Limitations
+## 7. Limitations
 
 - **Weak face likeness.** The reference is a single black-and-white archival photo, padded to the portrait canvas; at 480 px the face is a few dozen pixels, and VACE injects the reference rather than encoding identity strongly.
 - **Modern look before styling.** Raw outputs show modern colour and modern shoes/kit; the era filters (grayscale, grain, 18 fps) hide much of this, which is part of the design.
@@ -78,16 +111,17 @@ How to read them: PCK@0.2 = share of body joints within 20% of the torso length 
 - **Single reference photo.** Per-bone retargeting from one photo is noisy (ratios clamped to 0.6-1.6); the photo's pose and framing strongly affect the result.
 - **Short clips.** 33 frames at 16 fps is ~2 s per player; the final film is made from cuts, not one continuous shot.
 - **One seed, few clips.** Results come from seed 42 and a handful of clips; no variance across seeds was measured.
+- **Identity metric.** DINOv2 on whole-body crops also measures clothing and pose (the reference is seated, in a suit), so absolute values are low; use it to rank runs, not as a likeness score.
 - **Metric caveats.** PCK uses the same DWPose model that produced the control (shared biases). DINOv2 measures general visual similarity, not face identity. The flicker metric is lowered by repeated (held) frames, which matters for the AnimateDiff baseline.
 - **Precision.** fp16 on T4 with an fp8-stored text encoder (dequantised, the T4 has no native fp8).
 
-## 7. Ethics
+## 8. Ethics
 
 - Every generated video and title card carries a burned-in **"AI-generated - academic project"** label. Unlabelled copies are used only to compute metrics.
 - The videos depict real cricketers (some living). They are synthetic, made for academic use only, and must not be distributed as real footage.
 - Kaggle notebooks and datasets are kept **private**. Broadcast clips are used for private research only and are not redistributed.
 
-## 8. Licences
+## 9. Licences
 
 | Component | Licence / terms |
 |---|---|
@@ -96,6 +130,8 @@ How to read them: PCK@0.2 = share of body joints within 20% of the torso length 
 | rtmlib (code) | Apache-2.0 |
 | DWPose / RTMW weights | Trained on COCO-WholeBody: **no direct commercial use** |
 | DINOv2-small | Apache-2.0 |
+| Depth Anything V2 Small (`depth-anything/Depth-Anything-V2-Small-hf`) | Apache-2.0 |
+| rembg (code) / u2net weights | MIT / Apache-2.0 |
 | PyTorch / transformers | BSD-3 / Apache-2.0 |
 | OpenCV / NumPy / SciPy | Apache-2.0 / BSD-3 / BSD-3 |
 | FFmpeg (gyan.dev build) | GPL-3.0 |

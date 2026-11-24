@@ -119,6 +119,35 @@ def biggest_box(model, frame: np.ndarray) -> np.ndarray | None:
     return boxes[int(np.argmax((boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])))]
 
 
+def identity_scores(dino, crops: list[np.ndarray], ref_embs) -> dict:
+    """DINO cosine of each frame crop vs each reference. ref_embs: one embedding or {key: embedding}.
+
+    Key "" gives columns dino_mean/dino_min; key "crop" gives dino_crop_mean/dino_crop_min, etc.
+    """
+    if ref_embs is None or isinstance(ref_embs, np.ndarray):
+        ref_embs = {"": ref_embs}
+    emb = dino(crops) if (dino is not None and crops and any(v is not None for v in ref_embs.values())) else None
+    out = {}
+    for key, ref in ref_embs.items():
+        p = f"dino_{key}_" if key else "dino_"
+        if emb is None or ref is None:
+            out[p + "mean"], out[p + "min"] = float("nan"), float("nan")
+        else:
+            sims = emb @ ref
+            out[p + "mean"], out[p + "min"] = round(float(sims.mean()), 4), round(float(sims.min()), 4)
+    return out
+
+
+def ref_embedding(model, dino, photo_path: str, gray: bool = True) -> np.ndarray:
+    """DINO embedding of the (largest) person in a reference photo; whole image if no person is detected."""
+    photo = imread_any(photo_path)
+    box = biggest_box(model, photo)
+    if box is None:
+        print(f"WARNING: no person found in {photo_path}; using the whole image for identity")
+        box = np.array([0, 0, photo.shape[1], photo.shape[0]], np.float32)
+    return dino([person_crop(photo, box, gray=gray)])[0]
+
+
 def _identity_flicker_only(path, kind, name, model, frames, fps, ref_emb, dino, args) -> dict:
     """Used when no control is given (e.g. another team's generator with its own canvas/timeline): no PCK."""
     h, w = frames[0].shape[:2]
@@ -130,30 +159,32 @@ def _identity_flicker_only(path, kind, name, model, frames, fps, ref_emb, dino, 
         found += 1
         if dino is not None:
             crops.append(person_crop(frame, box, gray=not args.rgb_identity))
-    dmean = dmin = float("nan")
-    if dino is not None and crops and ref_emb is not None:
-        sims = dino(crops) @ ref_emb
-        dmean, dmin = float(sims.mean()), float(sims.min())
     bstd, fdiff = flicker_stats(frames)
     return {"timestamp": time.strftime("%Y-%m-%d %H:%M:%S"), "name": name, "kind": kind, "video": str(path),
             "frames_sampled": len(frames), "fps": round(fps, 2), "size": f"{w}x{h}",
             "person_found_rate": round(found / len(frames), 3), "pck@0.2": float("nan"), "pck_valid_joints": 0,
-            "dino_mean": round(dmean, 4), "dino_min": round(dmin, 4),
+            **identity_scores(dino, crops, ref_emb),
             "brightness_std": round(bstd, 3), "frame_diff_mean": round(fdiff, 3)}
 
 
 def evaluate_video(path: Path, kind: str, name: str, model, ctrl: np.ndarray, ctrl_fps: float, ctrl_size: tuple[int, int],
-                   ref_emb: np.ndarray | None, dino: Dino | None, args) -> dict:
+                   ref_emb, dino: Dino | None, args) -> dict:
+    """Score one video. ref_emb: None, one embedding, or {key: embedding} (see identity_scores)."""
     frames, fps = read_video(path)
     h, w = frames[0].shape[:2]
     if ctrl is None:                                                 # no control: identity + flicker only, all frames
         return _identity_flicker_only(path, kind, name, model, frames, fps, ref_emb, dino, args)
     n = len(ctrl)
-    # sample the video on the control's timeline (works for raw 16 fps and for retimed/styled 18 or 25 fps)
-    idx = np.clip(np.round(np.arange(n) / ctrl_fps * fps).astype(int), 0, len(frames) - 1)
-    # if the video is shorter than the control (e.g. a 17-frame smoke test), score only the frames it covers
-    covered = np.arange(n) / ctrl_fps < len(frames) / fps - 1e-6      # strictly inside the video's duration
-    idx, ctrl_use = idx[covered], ctrl[covered]
+    if abs(fps - ctrl_fps) < 0.01:
+        # same frame rate (raw generator output): frame i <-> control frame i. A shorter video (e.g. a 17-frame
+        # run made from a 33-frame control) is scored against the FIRST len(frames) control frames.
+        m = min(n, len(frames))
+        idx, ctrl_use = np.arange(m), ctrl[:m]
+    else:
+        # retimed/styled video (18 or 25 fps): sample it on the control's timeline, only where it has frames
+        idx = np.clip(np.round(np.arange(n) / ctrl_fps * fps).astype(int), 0, len(frames) - 1)
+        covered = np.arange(n) / ctrl_fps < len(frames) / fps - 1e-6
+        idx, ctrl_use = idx[covered], ctrl[covered]
 
     pred = np.full_like(ctrl_use, np.nan)
     crops, found = [], 0
@@ -172,15 +203,11 @@ def evaluate_video(path: Path, kind: str, name: str, model, ctrl: np.ndarray, ct
             crops.append(person_crop(frame, box, gray=not args.rgb_identity))
     score, n_joints = pck(ctrl_use[:, :17], pred, torso_length(ctrl), args.alpha)
 
-    dmean = dmin = float("nan")
-    if dino is not None and crops and ref_emb is not None:
-        sims = dino(crops) @ ref_emb
-        dmean, dmin = float(sims.mean()), float(sims.min())
     bstd, fdiff = flicker_stats(frames)
     return {"timestamp": time.strftime("%Y-%m-%d %H:%M:%S"), "name": name, "kind": kind, "video": str(path),
             "frames_sampled": len(idx), "fps": round(fps, 2), "size": f"{w}x{h}",
-            "person_found_rate": round(found / len(idx), 3), "pck@0.2": round(score, 4), "pck_valid_joints": n_joints,
-            "dino_mean": round(dmean, 4), "dino_min": round(dmin, 4),
+            "person_found_rate": round(found / max(1, len(idx)), 3), "pck@0.2": round(score, 4), "pck_valid_joints": n_joints,
+            **identity_scores(dino, crops, ref_emb),
             "brightness_std": round(bstd, 3), "frame_diff_mean": round(fdiff, 3)}
 
 
@@ -210,12 +237,7 @@ def main() -> int:
     dino = ref_emb = None
     if args.ref_photo and not args.skip_identity:
         dino = Dino(args.dino_model)
-        photo = imread_any(args.ref_photo)
-        box = biggest_box(model, photo)
-        if box is None:
-            print("WARNING: no person found in the reference photo; using the whole image for identity")
-            box = np.array([0, 0, photo.shape[1], photo.shape[0]], np.float32)
-        ref_emb = dino([person_crop(photo, box, gray=not args.rgb_identity)])[0]
+        ref_emb = ref_embedding(model, dino, args.ref_photo, gray=not args.rgb_identity)
 
     rows = [evaluate_video(Path(args.video), "raw", args.name, model, ctrl, ctrl_fps, ctrl_size, ref_emb, dino, args)]
     for s in args.styled:

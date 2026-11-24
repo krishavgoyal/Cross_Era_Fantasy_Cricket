@@ -11,4 +11,6 @@ scipy
 # (skip all three lines below and pass --skip-identity to eval_metrics.py if you do not need the identity metric)
 transformers
 pillow
+# Only for scripts/prepare_ref.py (background removal, CPU)
+rembg[cpu]
 # ffmpeg is a system tool, not a pip package: winget install Gyan.FFmpeg (needed by make_sequence.py)
