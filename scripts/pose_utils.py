@@ -117,6 +117,32 @@ def read_video(path: str | Path, start: float = 0.0, end: float | None = None) -
     return frames, float(fps)
 
 
+# Social-media overlays in our driving clips (channel watermark, handle/caption/music bar), as fractions of the frame:
+# (y0, y1, x0, x1). Blurred in figures and comparison videos; the clips are used only for motion.
+OVERLAY_BANDS = {"C2_coverdrive": [(0.80, 1.00, 0.0, 1.0), (0.11, 0.17, 0.0, 0.40)]}
+
+
+def parse_bands(text: str | None) -> list[tuple[float, float, float, float]]:
+    """'y0,y1,x0,x1;y0,y1,x0,x1' -> list of tuples (fractions of height/width)."""
+    if not text:
+        return []
+    return [tuple(float(v) for v in part.split(",")) for part in text.split(";") if part.strip()]
+
+
+def blur_bands(img: np.ndarray, bands) -> np.ndarray:
+    """Return a copy with each band heavily pixelated + blurred (unreadable text/logos)."""
+    out = img.copy()
+    h, w = img.shape[:2]
+    for y0, y1, x0, x1 in bands:
+        Y0, Y1, X0, X1 = int(y0 * h), int(y1 * h), int(x0 * w), int(x1 * w)
+        if Y1 - Y0 < 2 or X1 - X0 < 2:
+            continue
+        roi = out[Y0:Y1, X0:X1]
+        small = cv2.resize(roi, (max(1, (X1 - X0) // 16), max(1, (Y1 - Y0) // 16)), interpolation=cv2.INTER_AREA)
+        out[Y0:Y1, X0:X1] = cv2.GaussianBlur(cv2.resize(small, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_LINEAR), (0, 0), 6)
+    return out
+
+
 def find_ffmpeg(tool: str = "ffmpeg") -> str | None:
     """Path of ffmpeg/ffprobe: PATH first, then the winget install folder (a terminal opened before
     `winget install Gyan.FFmpeg` does not see the new PATH entry yet)."""
@@ -143,7 +169,7 @@ def write_video(path: str | Path, frames: list[np.ndarray], fps: float) -> Path:
     writer.release()
     ffmpeg = find_ffmpeg()
     if ffmpeg:
-        subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-i", str(tmp), "-c:v", "libx264",
+        subprocess.run([ffmpeg, "-nostdin", "-y", "-loglevel", "error", "-i", str(tmp), "-c:v", "libx264",
                         "-pix_fmt", "yuv420p", "-crf", "16", "-r", str(fps), str(path)], check=True)
         tmp.unlink()
     else:

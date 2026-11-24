@@ -94,7 +94,7 @@ def build_sequence(clips: list[str], cards: list[str | None], intro: str | None,
         if outro:
             parts.append(str(make_card(outro, size, card_seconds, fps, tmp / "outro.mp4")))
 
-        cmd = [ffmpeg, "-y", "-loglevel", "error"]
+        cmd = [ffmpeg, "-nostdin", "-y", "-loglevel", "error"]
         for p in parts:
             cmd += ["-i", p]
         norm = ";".join(                                     # same size, fps, pixel format for every part

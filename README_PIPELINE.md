@@ -145,7 +145,7 @@ python scripts\prepare_ref.py --input "C:\Users\ASUS V16\Downloads\larwood.jpg" 
 python scripts\build_kaggle_inputs.py --preset bowler          # -> C:\cefc\cefc-inputs-bowler.zip (L1/L2/L3)
 # Kaggle: notebook Cell 1 RUN_MODE = "pairs" (default). Then, after downloading outputs_raw to data\gen\bowler_raw\:
 python scripts\make_final.py --input data\gen\bowler_raw\L1_s42_33f.mp4 --tag _bowler --source-duration 2.0 --source-clip data\clips\B1_bowler.mp4 --control data\pose\bowler\depth_33.mp4 --title "Harold Larwood - bowling, reimagined"
-python scripts\make_match.py --bowler data\gen\bowler_raw\L1_s42_33f.mp4 --batter data\gen\v3_raw\final_nocap_s42_33f.mp4
+python scripts\make_match.py --bowler data\gen\bowler_raw\L1_s42_33f.mp4      # batter default: final_cap (the chosen batter final)
 python scripts\score_ablation.py                                # L1-L3 identity is scored against Larwood
 ```
 

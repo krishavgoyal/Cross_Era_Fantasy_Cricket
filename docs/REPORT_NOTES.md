@@ -150,7 +150,7 @@ PCK is against each run's own control (pose runs vs the skeleton, depth runs vs 
   | F1 `final_cap` | default (cap) | 0.904 | 0.217 | 0.175 | 1.65 | 11.93 |
   | F2 `final_nocap` | bare-headed | 0.882 | 0.203 | 0.195 | 3.78 | 9.17 |
 
-  Both follow the motion well over the full 33 frames. Identity scores are similar (within the seed spread seen in D1-D4). The no-cap prompt has more brightness variation, but lower frame-to-frame difference. **[TODO]** visual verdict (face visible? one bat? white pads?).
+  Both follow the motion well over the full 33 frames. Identity scores are similar (within the seed spread seen in D1-D4). The no-cap prompt has more brightness variation, but lower frame-to-frame difference. **Chosen batter final: F1 `final_cap`**, by visual inspection: it gives the better face and the cleaner bat. The numbers do not separate F1 and F2 (identity differences are within the seed spread), so the choice rests on the visual check. F1 is used in `final_match.mp4` and the presentation.
 
 ### 6.3 Team baseline
 
@@ -174,7 +174,7 @@ PCK is against each run's own control (pose runs vs the skeleton, depth runs vs 
 - **Runs** (`cefc-inputs-bowler.zip`, notebook `RUN_MODE = "pairs"`): L1/L2/L3 = target-only depth + `larwood_crop.png`, seeds 42 / 7 / 2024, 33 frames.
   - Prompt: "archival 1930s photograph, fast bowler, bare-headed with short neatly combed hair, face clearly visible, white long-sleeved flannel shirt and long white trousers, white boots, delivering a cricket ball with a high overarm bowling action, natural motion".
   - Negative: the default negative **without "missing bat"** (it would push the model to draw a bat), plus "cricket bat, cap, hat, fedora, suit, blazer, jacket, dark coat, cigarette, helmet, logo, purple shirt, coloured kit, shorts, bare legs, sleeveless, extra people".
-- **Match video:** `make_match.py` -> `data/final/final_match.mp4`: intro card "Harold Larwood vs Sir Don Bradman - Bodyline, reimagined", then "Larwood bowls" + bowler (1930s), then "Bradman drives" + batter (1930s, default `final_nocap`).
+- **Match video:** `make_match.py` -> `data/final/final_match.mp4`: intro card "Harold Larwood vs Sir Don Bradman - Bodyline, reimagined", then "Larwood bowls" + bowler (1930s), then "Bradman drives" + batter (1930s, default `final_cap`, the chosen batter final).
 - **Results [TODO]:** L1-L3 PCK / identity vs `larwood_crop.png` and the original photo (`score_ablation.py`), visual check (bare-headed? no hat or cigarette? white kit? one ball, no bat, no extra people?), chosen seed.
 
 ## 7. Limitations

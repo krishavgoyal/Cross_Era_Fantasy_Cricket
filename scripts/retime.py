@@ -55,7 +55,7 @@ def retime(src: str | Path, dst: str | Path, source_duration: float = 5.6, fps: 
     dst.parent.mkdir(parents=True, exist_ok=True)
     vf = retime_filter(method, n, in_fps, source_duration, fps)
     # keep exactly the real duration (+ one output frame so the last source sample is shown)
-    subprocess.run([ffmpeg, "-y", "-loglevel", "error", "-i", str(src), "-vf", vf, "-t", f"{source_duration + 1 / fps:.4f}",
+    subprocess.run([ffmpeg, "-nostdin", "-y", "-loglevel", "error", "-i", str(src), "-vf", vf, "-t", f"{source_duration + 1 / fps:.4f}",
                     "-an", "-c:v", "libx264", "-crf", "16", "-pix_fmt", "yuv420p", "-r", f"{fps:g}", str(dst)], check=True)
     return dst
 

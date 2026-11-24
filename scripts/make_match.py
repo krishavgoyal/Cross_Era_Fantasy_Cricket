@@ -6,7 +6,7 @@ source squeezed into 33 frames) and styled 1930s_film, exactly as make_final.py 
 
 Usage
   python scripts/make_match.py
-  python scripts/make_match.py --bowler data/gen/bowler_raw/L2_s7_33f.mp4 --batter data/gen/v3_raw/final_cap_s42_33f.mp4
+  python scripts/make_match.py --bowler data/gen/bowler_raw/L2_s7_33f.mp4 --batter data/gen/v3_raw/final_nocap_s42_33f.mp4
 Output: data/final/final_match.mp4
 """
 from __future__ import annotations
@@ -22,7 +22,8 @@ from pose_utils import read_video
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--bowler", default="data/gen/bowler_raw/L1_s42_33f.mp4", help="RAW bowler clip (no label)")
-    ap.add_argument("--batter", default="data/gen/v3_raw/final_nocap_s42_33f.mp4", help="RAW batter clip (no label)")
+    ap.add_argument("--batter", default="data/gen/v3_raw/final_cap_s42_33f.mp4",
+                    help="RAW batter clip (no label); final_cap was chosen as the batter final")
     ap.add_argument("--bowler-duration", type=float, default=2.0, help="seconds of source the bowler clip covers")
     ap.add_argument("--batter-duration", type=float, default=5.6, help="seconds of source the batter clip covers")
     ap.add_argument("--title", default="Harold Larwood vs Sir Don Bradman - Bodyline, reimagined")

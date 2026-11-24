@@ -27,7 +27,7 @@ import numpy as np
 
 from era_filters import apply_preset, burn_label
 from make_sequence import build_sequence
-from pose_utils import read_video, write_video
+from pose_utils import OVERLAY_BANDS, blur_bands, parse_bands, read_video, write_video
 from retime import DEFAULT_METHOD, retime
 
 ERAS = [("1930s_film", "1930s newsreel film"), ("1970s_tv", "1970s colour television"),
@@ -49,9 +49,13 @@ def header(img: np.ndarray, text: str) -> np.ndarray:
 
 
 def make_compare(source_clip: str, source_start: float, duration: float, control: str, generated: Path,
-                 out: Path, fps: float = 24.0, height: int = 832) -> Path:
-    """Side by side on one timeline: real source | control | generated result."""
+                 out: Path, fps: float = 24.0, height: int = 832, bands=None) -> Path:
+    """Side by side on one timeline: real source | control | generated result. `bands` = source areas to blur."""
     src, sfps = read_video(source_clip)
+    if bands is None:
+        bands = OVERLAY_BANDS.get(Path(source_clip).stem, [])
+    if bands:
+        src = [blur_bands(f, bands) for f in src]                     # hide social-media overlays
     ctl, _ = read_video(control)
     gen, gfps = read_video(generated)
     ctl_step = duration / (len(ctl) - 1)                    # control frame i = source time start + i*step
@@ -107,6 +111,9 @@ def main() -> int:
     ap.add_argument("--source-clip", default="data/clips/C2_coverdrive.mp4")
     ap.add_argument("--source-start", type=float, default=0.0)
     ap.add_argument("--control", default="data/pose/batter/depth_33.mp4", help="control video that generated --input")
+    ap.add_argument("--blur-source", default=None,
+                    help="source areas to blur in compare*.mp4: 'y0,y1,x0,x1;...' (fractions). Default: known "
+                         "overlays of the clip (pose_utils.OVERLAY_BANDS); 'none' = no blur")
     ap.add_argument("--method", default=DEFAULT_METHOD, choices=["hold", "blend", "mci"])
     ap.add_argument("--fps", type=float, default=24.0)
     ap.add_argument("--title", "--intro", dest="intro", default="Sir Don Bradman - a cover drive, reimagined",
@@ -130,7 +137,8 @@ def main() -> int:
                           out / f"final_eras{args.tag}.mp4", size, 25.0, args.era_card_seconds)
     # 5) side-by-side comparison on the source timeline
     compare = make_compare(args.source_clip, args.source_start, args.source_duration, args.control,
-                           styled["1930s_film"], out / f"compare{args.tag}.mp4", args.fps)
+                           styled["1930s_film"], out / f"compare{args.tag}.mp4", args.fps,
+                           bands=None if args.blur_source is None else ([] if args.blur_source == "none" else parse_bands(args.blur_source)))
 
     print("\nChecks:")
     print(" ", check(final, (args.card_seconds, 99.0)))      # black-frame count over the clip part (after the card)
