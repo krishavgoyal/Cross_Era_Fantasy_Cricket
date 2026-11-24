@@ -91,6 +91,26 @@ From the Phase 0 research (`docs/research/PHASE0_RESEARCH.md`, `docs/research/PH
 
 Reading: motion following is already good (PCK 0.88-0.93), so the problem is appearance. The low identity scores (about 0.2) match the generic face seen by eye. These are whole-body crops: the reference shows a seated man in a suit and the output a standing batter in whites, so the absolute values are low for every run. **Compare runs with each other, not with 1.0.**
 
+**Ablation outcome (Kaggle, 2026-11-24).** B, C and D1-D4 all finished with status "ok", about 280 s each for 17 frames on the T4. Visual check:
+
+| Run | Control / ref / seed | Bat | Head in frame | Extra balls | Other |
+|---|---|---|---|---|---|
+| B | depth / padded / 42 | one proper bat, whole clip | yes | none | large dark cap hides the face |
+| C | pose / crop / 42 | **lost** (like run A) | yes | none | |
+| D1 | depth / crop / 42 | one proper bat, whole clip | yes | none | dark cap hides the face; logo on the cap. **Best overall** |
+| D2 | depth / crop / 7 | one proper bat, whole clip | yes | none | dark cap hides the face |
+| D3 | depth / crop / 123 | one proper bat, whole clip | yes | none | dark cap; modern black pads / black trousers |
+| D4 | depth / crop / 2024 | one proper bat, whole clip | yes | none | dark cap; modern black pads / black trousers |
+
+- **Depth control is what fixed the bat.** All depth runs (B, D1-D4) keep one proper bat for the whole clip, while pose + tight reference (C) loses it just like run A (pose + padded). The skeleton has no bat information; the depth map does.
+- **The top margin fixed the cut-off head**, and the depth runs have **no extra balls**.
+- **Remaining problem: the face.** A large dark cap hides it. Two causes: the prompt asks for "a cap", and the depth map still carries the modern helmet's outline (`--soften-head` flattens only the inside of the head). D1 adds a logo on the cap; D3/D4 drift to modern black pads and trousers, so seed matters for clothing.
+- **Chosen:** D1 (seed 42). Final runs use depth + `bradman_crop.png`, 33 frames, seed 42, in two variants:
+  - **F1 `final_cap`**: the ablation prompt.
+  - **F2 `final_nocap`**: a bare-headed prompt ("bare-headed cricketer with short neatly combed hair, face clearly visible, white flannel shirt and white trousers, white leg pads, ..."), with the negative prompt extended by "cap, hat, helmet, logo, black pads, black trousers, dark pads".
+  - The default negative now also includes "logo, black pads, black trousers".
+  - Outputs: `final_cap_s42_33f.mp4`, `final_nocap_s42_33f.mp4`. Score both with `score_ablation.py` (control `data/pose/batter/depth_33.npz`) and compare face visibility by eye.
+
 ## 6. Results [TODO]
 
 Paste from `results/metrics.csv` (raw vs styled, VACE vs AnimateDiff baseline):

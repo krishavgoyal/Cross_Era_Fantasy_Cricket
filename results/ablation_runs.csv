@@ -6,3 +6,5 @@ D1,depth,crop,42,data/gen/v2_raw/D1_s42_17f.mp4,data/pose/batter/depth_33.npz
 D2,depth,crop,7,data/gen/v2_raw/D2_s7_17f.mp4,data/pose/batter/depth_33.npz
 D3,depth,crop,123,data/gen/v2_raw/D3_s123_17f.mp4,data/pose/batter/depth_33.npz
 D4,depth,crop,2024,data/gen/v2_raw/D4_s2024_17f.mp4,data/pose/batter/depth_33.npz
+F1,depth,crop,42,data/gen/v3_raw/final_cap_s42_33f.mp4,data/pose/batter/depth_33.npz
+F2,depth,crop,42,data/gen/v3_raw/final_nocap_s42_33f.mp4,data/pose/batter/depth_33.npz
