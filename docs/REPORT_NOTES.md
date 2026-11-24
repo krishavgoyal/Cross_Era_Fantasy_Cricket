@@ -87,7 +87,7 @@ From the Phase 0 research (`docs/research/PHASE0_RESEARCH.md`, `docs/research/PH
 |---|---|---|---|---|---|---|---|---|
 | A | pose (no margin) | padded | 17 | 0.934 | 0.205 | 0.158 | 2.27 | 10.10 |
 | A, 33 frames | pose (no margin) | padded | 33 | 0.882 | 0.189 | 0.124 | 4.46 | 12.55 |
-| B / C / D1-D4 | | | 17 | [TODO] | [TODO] | [TODO] | | |
+| B / C / D1-D4 | | | 17 | see 6.1 | see 6.1 | see 6.1 | | |
 
 Reading: motion following is already good (PCK 0.88-0.93), so the problem is appearance. The low identity scores (about 0.2) match the generic face seen by eye. These are whole-body crops: the reference shows a seated man in a suit and the output a standing batter in whites, so the absolute values are low for every run. **Compare runs with each other, not with 1.0.**
 
